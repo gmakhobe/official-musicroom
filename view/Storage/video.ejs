@@ -1,0 +1,277 @@
+<!-- partial:header -->
+<%- include ('admin/admin-header.ejs') %>
+<div class="container-scroller">
+  <!-- partial:top nav bar -->
+  <%- include ('admin/top-nav.ejs') %>
+  <div class="container-fluid page-body-wrapper">
+    <!-- partial:top side bar -->
+    <%- include ('admin/side-nav.ejs') %>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+
+              <div class="row">
+                <div class="col-sm-3">
+                  <img id="img-url" class="img-thumbnail movie-block-img" src="<%= movie.large_cover_image %>"
+                    style="height:auto;width:100%" />
+                </div>
+                <div class="col-sm-9">
+                  <h3 id="movieName"><%= movie.title %></h3>
+                  <p><%= movie.description_full %></p>
+                  <p>Release Date: <%= movie.year %>-06-25</p>
+                  <p>Runtime: <%= movie.runtime %></p>
+                  <p>Genres:
+                    <% for (let genre of movie.genres) { %>
+                    <%= genre %>,
+                    <% } %>
+                  </p>
+                  <div>
+                    <h3>Cast</h3>
+                    <div class="row">
+                      <% if (movie.cast) { %>
+                      <% for (let cast of movie.cast) { %>
+                      <div class="col-sm-2">
+                        <p><%= cast.name %>, <%= cast.character_name %></p>
+                        <img class="img-thumbnail movie-block-img" src="<%= cast.url_small_image %>"
+                          style="height:auto;width:100%" />
+                      </div>
+                      <% } %>
+                      <% } %>
+                    </div>
+                  </div>
+                  <h3>Magnet Link:</h3>
+                  <a id="magnet" href="<%= Magnet %>"><%= Magnet %></a>
+                  <h3>Movie Id: </h3>
+                  <p id="movieId" ><%= movie.id %></p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+
+              <video on id="player" controls style="width:100%;height:auto;">
+                <source src="" />
+              </video>
+
+              <hr>
+
+              <h4 id="video-warning" class="alert-info">Video will be donloaded while streaming, you might see errors such as NO VIDEO WITH SUPPORTED FORMAT AND MIME TYPE FOUND, in that case our streaming engine is downloading octets from Peers and it might take a while to have a streamable bytes. Press Resume Stream to re-attach available octets to play.</h4>
+
+              <hr>
+
+              <center>
+              <div class="btn-group btn-group-justified">
+                <a href="javascript:fetchMoviePackets()" class="btn btn-primary">Play</a>
+                <a href="javascript:ResumeStream()" class="btn btn-info">Resume Stream</a>
+              </div>
+            </center>
+
+              <script>
+                function ResumeStream(){
+
+                  let video = document.getElementById("player");
+                  let url = video.src;
+                  video.src = url;
+
+                  alert("Link re-attached if the movie is not continuing as expected this might be due to slow download speed!");
+
+                }
+
+
+                const videoTag = document.getElementById("player");
+
+                videoTag.addEventListener("suspend", () => {
+                
+                  //alert("Video resource is being downloaded, this might be slow due to your internet or our streaming engine. Please press Resume Stream to load downloaded octets from inital octets!");
+                  console.log("Video resource is being downloaded, this might be slow due to your internet or our streaming engine. Please press Resume Stream to load downloaded octets from inital octets!");
+
+                });
+                
+                const VW = document.getElementById("video-warning");
+                  VW.style.display = "none";
+
+
+                const fetchMoviePackets = () => {
+                  let magent = document.getElementById("magnet").innerHTML;
+                  let movieId = document.getElementById("movieId").innerHTML;
+                  let movieName = document.getElementById("movieName").innerHTML;
+                  let movieMediaArt = document.getElementById("img-url");
+                  magent = encodeURI(magent);
+                  movieMediaArt = encodeURI(movieMediaArt.src);
+                  const reqbody = `magnet=${magent}&MovieID=${movieId}&MovieName=${movieName}&imgURL=${movieMediaArt}`;
+                  const video = document.getElementById("player");
+                  const VW = document.getElementById("video-warning");
+                  VW.style.display = "inline";
+
+                  alert("Please wait for a moment for stream engine to start, Press okay to proceed!");
+
+                  //Fetch Api to send a request
+                  fetch('/user/stream', {
+                    method: 'post',
+                    headers: {
+                      "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: reqbody
+                  })
+                    .then(res => {
+                      if (res.status == 200)
+                        return res.text();
+                      else
+                        alert("An error occured please try again!");
+                    })
+                    .then(response => {
+
+                      let res = JSON.parse(response);
+
+                      if (res.status == 1){
+
+                        alert("Streaming engine is ready please wait, the video stream will be available in 10 seconds! Press okay to proceed!");
+
+                        setTimeout(function(){ 
+                          
+                          alert("Video Stream is available press okay then play button from video element to stream the movie!");
+
+                          video.src = "/" + res.url;
+
+                         }, 10000);
+
+                      }else{
+                        alert("An error occured trying to stream the video");
+                      }
+
+                    })
+                    .catch(res => {
+                      //Print any error related to sending request
+                      alert(`An error occured: ${res}`);
+                    });
+                }
+              </script>
+
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-12 grid-margin stretch-card">
+
+          <div class="card">
+            <div class="card-body">
+
+              <h3>Comments</h3>
+              <!-- Left-aligned -->
+              <div id="comment-container">
+                <% if (Comments.length) { %>
+                <% for (let comment of Comments) { %>
+                <div class="media">
+                  <div class="media-left">
+                    <% if (!comment.ProfilePicture ) { %>
+                    <img src="/images/profile.svg" class="media-object" style="width:60px">
+                    <% }else{ %>
+                    <img src="<%= comment.ProfilePicture %>" class="media-object" style="width:60px">
+                    <% } %>
+                  </div>
+                  <div class="media-body">
+                    <h4 class="media-heading"><%= comment.FirstName %> <%= comment.LastName %></h4>
+                    <p><%= comment.Comment %></p>
+                  </div>
+                </div>
+                <% } %>
+                <% } %>
+                .......................
+              </div>
+
+              <div class="form-group">
+                <input id="MovieId" value="<%= movie.id %>" hidden />
+                <label for="Comment">Comment:</label>
+                <textarea id="Comment" class="form-control" rows="5"></textarea>
+              </div>
+
+              <button onclick="SubmitComment();" class="btn btn-gradient-dark"> Submit Comment</button>
+
+              <script>
+
+                function SubmitComment() {
+                  const MID = document.getElementById("MovieId").value;
+                  const Comment = document.getElementById("Comment").value;
+                  const display = document.getElementById("comment-container");
+
+                  if (!Comment) {
+                    alert("An error occured please try again!");
+                    return;
+                  }
+                  if (Comment.length <= 2) {
+                    alert("Comment must be morethan 2 charecters long!");
+                    return;
+                  }
+
+                  const reqbody = `comment=${Comment}&movieid=${MID}`;
+
+                  //Fetch Api to send a request
+                  fetch('/user/comment', {
+                    method: 'post',
+                    headers: {
+                      "Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    },
+                    body: reqbody
+                  })
+                    .then(res => {
+                      if (res.status == 200)
+                        return res.text();
+                      else
+                        alert("An error occured please try again!");
+                    })
+                    .then(text => {
+                      //Get results and convert them to an object
+                      const res = JSON.parse(text);
+                      //if ststus is true print success and locate to a different page else print error
+                      if (res.status) {
+                        alert("Comment submitted successfully");
+                        display.innerHTML += `<div class="media">
+                                      <div class="media-left">
+                                        <img src="/images/profile.svg" class="media-object" style="width:60px">
+                                      </div>
+                                      <div class="media-body">
+                                        <h4 class="media-heading">You</h4>
+                                        <p>${Comment}</p>
+                                      </div>
+                                    </div>`;
+                      } else {
+                        alert("Comment failed to be posted please try again later!");
+                      }
+                    })
+                    .catch(res => {
+                      //Print any error related to sending request
+                      alert("Something went wrong please try again later!");
+                    });
+
+
+                }
+
+              </script>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <%- include ('admin/admin-footer.ejs') %>
+    </div>
+  </div>
+</div>
+<script src="/vendors/js/vendor.bundle.base.js"></script>
+<script src="/vendors/chart.js/Chart.min.js"></script>
+<script src="/js/off-canvas.js"></script>
+<script src="/js/hoverable-collapse.js"></script>
+<script src="/js/misc.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/todolist.js"></script>
+</body>
+
+</html>
