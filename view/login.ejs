@@ -1,0 +1,56 @@
+<%- include ('layouts/main-header.ejs') %>
+<div class="container-fluid page-body-wrapper full-page-wrapper">
+    <div class="content-wrapper d-flex align-items-center auth">
+        <div class="row flex-grow">
+            <div class="col-lg-4 mx-auto">
+                <div class="auth-form-light text-left p-5">
+                    <div class="brand-logo">
+                        <h1 class="text-center">
+                            <span class="logoIcon">M</span><%= title %></h1>
+                    </div>
+                    <h6 class="font-weight-light text-center">Sign in to continue.</h6>
+                    <div class="pt-3">
+                        <form action="/api/auth/login/facebook" method="get" class="mt-3">
+                            <button type="submit"
+                                class="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn"
+                                onclick="btnIntra42()"><img
+                                    src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse4.mm.bing.net%2Fth%3Fid%3DOIP.Mfr0UZqOi-aMuHglM9EuNgHaHa%26pid%3DApi&f=1"
+                                    width="25" height="25" /> SIGN IN</button>
+                        </form>
+                        <form action="/api/auth/login/google" method="get" class="mt-3">
+                            <button type="submit"
+                                class="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn"><img
+                                    src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIP.zchNIpGPo8YTLfFh4I99eQHaHa%26pid%3DApi&f=1"
+                                    width="25" height="25" /> SIGN IN</button>
+                        </form>
+
+                        <script>
+                            var getParams = function (url) {
+                                var params = {};
+                                var parser = document.createElement('a');
+                                parser.href = url;
+                                var query = parser.search.substring(1);
+                                var vars = query.split('&');
+                                for (var i = 0; i < vars.length; i++) {
+                                    var pair = vars[i].split('=');
+                                    params[pair[0]] = decodeURIComponent(pair[1]);
+                                }
+                                return params;
+                            };
+
+                            const token = getParams(window.location.href);
+                            if (!token.token){
+                                
+                            }else{
+                                localStorage.setItem("token", token.token);
+                                window.location.assign("/profile");
+                            }
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include ('layouts/main-footer.ejs') %>

@@ -4,5 +4,10 @@ const indexRouter = require("../controller/IndexController");
 
 // On get request 
 router.get("/", indexRouter.LandingPage);
+router.get("/login", indexRouter.LoginPage);
+router.get("/profile", indexRouter.ProfilePage);
+router.get("/explore", indexRouter.ExplorePage);
+
+// On post request
 
 module.exports = router;
