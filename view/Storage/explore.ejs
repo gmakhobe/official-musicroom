@@ -60,27 +60,27 @@
 
             <div class="card-body" id="movies-container">
 
-              <% if (!fromSearch) { %>
+              <   % if (!fromSearch) { %>
               <div class="row">
 
-                <% for (let movie of movies) { %>
+                < % for (let movie of movies) { %>
 
                 <div class="col-sm-4 movie-block">
 
-                  <form method="POST" action="/user/video/<%= movie.Name %>">
+                  <form method="POST" action="/user/video/< % = movie.Name %>">
 
-                    <input value="<%= movie.Name %>" name="Name" hidden/>
+                    <input value="< %= movie.Name %>" name="Name" hidden/>
 
-                  <img class="img-thumbnail movie-block-img" src="<%= movie.Poster_Path %>"
+                  <img class="img-thumbnail movie-block-img" src="< % = movie.Poster_Path %>"
                     style="height:auto;width:100%" />
 
                   <br>
 
-                  <h3 class="movie-block-name"><%= movie.Name %></h3>
+                  <h3 class="movie-block-name">< %= movie.Name %></h3>
 
                   <p>
-                    Rating: <span class="movie-block-vote"><%= movie.Vote %></span><br>
-                    Release year: <span class="movie-block-date"><%= movie.Date %></span>
+                    Rating: <span class="movie-block-vote">< %= movie.Vote %></span><br>
+                    Release year: <span class="movie-block-date">< %= movie.Date %></span>
                   </p>
 
                   <center>
@@ -91,46 +91,46 @@
 
                 </div>
 
-                <% } %>
+                < % } %>
               </div>
-              <% }else{ %>
+              < % }else{ %>
 
               <div class="row">
 
-                <% for (let movie of movies) { %>
+                < % for (let movie of movies) { %>
 
                 <div class="col-sm-4 movie-block">
 
-                  <form method="POST" action="/user/video/<%= movie.Name %>">
+                  <form method="POST" action="/user/video/< %= movie.Name %>">
 
-                    <input value="<%= movie.Name %>" name="Name" hidden/>
+                    <input value="<  %= movie.Name %>" name="Name" hidden/>
 
-                  <img class="img-thumbnail movie-block-img" src="<%= movie.Poster_Path %>"
+                  <img class="img-thumbnail movie-block-img" src="< %= movie.Poster_Path %>"
                     style="height:auto;width:100%" />
 
                   <br>
 
-                  <h3 class="movie-block-name"><%= movie.Name %></h3>
+                  <h3 class="movie-block-name">< %= movie.Name %></h3>
 
                   <p>
-                    Rating: <span class="movie-block-vote"><%= movie.Vote %></span><br>
-                    Release year: <span class="movie-block-date"><%= movie.Date %></span>
+                    Rating: <span class="movie-block-vote"><  %= movie.Vote %></span><br>
+                    Release year: <span class="movie-block-date">< %= movie.Date %></span>
                   </p>
 
-                  <% if (movie.Name != "No data found!"){ %>
+                  < % if (movie.Name != "No data found!"){ %>
                   <center>
                     <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
                   </center>
-                  <% } %>
+                  < % } %>
 
                   </form>
 
                 </div>
 
-                <% } %>
+                < % } %>
               </div>
 
-              <% }%>
+              < % }%>
 
               <center>
                 <br>
@@ -146,7 +146,7 @@
           </div>
         </div>
 
-        <% if (!fromSearch) { %>
+        < % if (!fromSearch) { %>
 
           <div class="col-12 grid-margin stretch-card">
             <div class="card">
@@ -155,20 +155,20 @@
 
                   <div class="row">
     
-                    <% for (let seenMovie of SeenMovies) { %>
+                    < % for (let seenMovie of SeenMovies) { %>
     
                     <div class="col-sm-4">
     
-                      <form method="POST" action="/user/video/<%= seenMovie.MovieName %>">
+                      <form method="POST" action="/user/video/< %= seenMovie.MovieName %>">
     
-                        <input value="<%= seenMovie.MovieName %>" name="Name" hidden/>
+                        <input value="< %= seenMovie.MovieName %>" name="Name" hidden/>
     
-                      <img class="img-thumbnail" src="<%= seenMovie.MovieURL %>"
+                      <img class="img-thumbnail" src="< %= seenMovie.MovieURL %>"
                         style="height:auto;width:100%" />
     
                       <br>
     
-                      <h3 class="movie-block-name"><%= seenMovie.MovieName %></h3>
+                      <h3 class="movie-block-name">< %= seenMovie.MovieName %></h3>
     
                       <center>
                         <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
@@ -178,14 +178,14 @@
     
                     </div>
     
-                    <% } %>
+                    < % } %>
                   </div>
 
               </div>
             </div>
           </div>
 
-        <% } %>
+        < % } %>
 
         <script>
 
@@ -366,16 +366,16 @@
           }
         </script>
 
-        <% if (!fromSearch) { %>
+        < % if (!fromSearch) { %>
         <script>
-          loadFirstBatch();
+          //loadFirstBatch();
         </script>
-        <% }else{ %>
+        < % }else{ %>
         <script>
-          sortByNameAsc();
-          loadFirstBatch();
+          ////sortByNameAsc();
+          //loadFirstBatch();
         </script>
-        <% } %>
+        < % } %>
 
         <%- include ('admin/admin-footer.ejs') %>
       </div>

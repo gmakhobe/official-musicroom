@@ -138,6 +138,12 @@
               <br />
 
               <script>
+
+                function LinkToDeezer(){
+                  window.location.assign("/api/auth/link/deezer");
+                }
+
+
                 const GetUserInformation = () => {
 
                   const token = localStorage.getItem("token");
@@ -166,10 +172,19 @@
                       document.getElementById("p-surname").value = data.user.lastname;
                       document.getElementById("p-username").value = data.user.username;
                       document.getElementById("p-email").value = data.user.email;
-                      //Save _id - user id
-                      localStorage.setItem("UserId", data.user._id);
 
+                      if (!data.user._deezerId || !data.user.deezerToken) {
 
+                        let response = confirm("Link with deezer!");
+                        //console.log(response);
+
+                        if (response){
+
+                          LinkToDeezer();
+
+                        }
+
+                      }
                     })
                     .catch(error => {
                       alert(`An error occured! ${error}`);
@@ -200,11 +215,11 @@
                         'Content-Type': 'application/json'
                       },
                       body: JSON.stringify({
-                        id:userid,
+                        id: userid,
                         firstname: name,
                         lastname: surname,
                         username: username,
-                        email:email
+                        email: email
                       })
                     })
                     .then(res => {

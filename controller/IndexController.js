@@ -16,3 +16,8 @@ exports.RegisterPage = (req, res) => {
 exports.ProfilePage = (req, res) => {
     return res.render('Storage/profile', { title: Title});
 }
+
+exports.ExplorePage = (req, res) => {
+    return res.render('Storage/explore', { title: Title});
+}
+
