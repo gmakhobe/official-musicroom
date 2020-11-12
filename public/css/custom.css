@@ -22,7 +22,11 @@ span.logoIcon {
 }
 
 .jumbotron-heading {
-    color: white
+    color: white;
+    background: purple;
+    padding: 20px;
+    width: auto;
+    display: inline-block;
 }
 
 .text-muted {
