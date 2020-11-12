@@ -1,0 +1,60 @@
+span.logoIcon {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 10px;
+    font-size: 30px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    border: 3px double black;
+    border-radius: 20%;
+}
+
+.jumbotron {
+    background: url('../images/cover.jpg')center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height: 500px;
+    margin-bottom: 0px;
+    ;
+}
+
+.jumbotron-heading {
+    color: white
+}
+
+.text-muted {
+    color: white;
+}
+
+.lead {
+    color: white;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+a:hover{
+    text-decoration: none;
+    color: black;
+}
+
+.day{
+    width: 5rem;
+    margin-right: 20px;
+}
+.month{
+    width: 9.9rem;
+    margin-right: 20px;
+
+}
+
+.year{
+    width:5rem;
+}
+
+.form-inline{
+    margin-bottom: 1.5rem;
+}

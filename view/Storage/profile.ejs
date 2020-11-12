@@ -1,0 +1,243 @@
+<!-- partial:header -->
+<%- include ('admin/admin-header.ejs') %>
+<div class="container-scroller">
+  <!-- partial:top nav bar -->
+  <%- include ('admin/top-nav.ejs') %>
+  <div class="container-fluid page-body-wrapper">
+    <!-- partial:top side bar -->
+    <%- include ('admin/side-nav.ejs') %>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+              <h1>Hello World</h1>
+              <center>
+                <img style="width:200px;height:auto" src="/images/profile.svg" alt="image" class="img-thumbnail">
+                <br>
+                <h4 id="header-userinfo">
+                  Name and Surname
+                </h4>
+              </center>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 grid-margin stretch-card"></div>
+        <div class="card">
+          <div class="card-body">
+
+
+            <h4 class="card-title">Profile</h4>
+            <p class="alert-warning">Only after updating your email address the app will auto logout and you will need
+              to login.</p>
+            <div class="forms-sample row">
+
+              <div class="col-sm-6">
+
+                <div class="form-group">
+                  <label for="p-name" class="col-form-label">First Name</label>
+                  <input value="" type="text" class="form-control" id="p-name" placeholder="First Name" name="Name">
+                </div>
+
+                <div class="form-group">
+                  <label for="p-surname" class="col-form-label">Last Name</label>
+                  <input value="" type="text" class="form-control" id="p-surname" placeholder="lastname" name="Surname">
+                </div>
+
+              </div>
+
+              <div class="col-sm-6">
+
+                <div class="form-group">
+                  <label for="p-username" class="col-form-label">Username</label>
+                  <input value="" type="text" class="form-control" id="p-username" placeholder="username"
+                    name="Username">
+                </div>
+
+                <div class="form-group">
+                  <label for="p-email" class="col-form-label">Email Address</label>
+                  <input value="" type="text" class="form-control" id="p-email" placeholder="email" name="Email">
+                </div>
+
+              </div>
+
+              <button id="UserProfileDataSave" onclick="UserSaveProfile()" class="btn btn-gradient-success mr-2">Save
+                Profile</button>
+
+
+              <button id="UserProfileDataCheck" onclick="UserProfileDataCheck()"
+                class="btn btn-gradient-success mr-2">Check Before Saving</button>
+
+              <script>
+                document.getElementById("UserProfileDataSave").style.display = "none";
+
+                function UserProfileDataCheck() {
+                  const nameEl = document.getElementById("p-name");
+                  const surnameEl = document.getElementById("p-surname");
+                  const emailEl = document.getElementById("p-email");
+                  const usernameEl = document.getElementById("p-username");
+
+                  name = nameEl.value;
+                  surname = surnameEl.value;
+                  email = emailEl.value;
+                  username = usernameEl.value;
+
+                  if (!name || !surname || !email || !username) {
+                    alert("All fields are required");
+                    return;
+                  }
+
+                  if (name.length < 4) {
+                    alert("Name should be more than 3 charecters!");
+                    return;
+                  }
+
+                  if (surname.length < 4) {
+                    alert("Surname should be more than 3 charecters!");
+                    return;
+                  }
+
+                  if (email.length < 5) {
+                    alert("Email Address should be more than 5 charecters!");
+                    return;
+                  }
+
+                  if (username.length < 4) {
+                    alert("username should be more than 4 charecters!");
+                    return;
+                  }
+
+                  let atPosition = email.indexOf('@');
+                  let counter = 0;
+                  if (atPosition < 0) {
+                    alert("Please enter a valid email address!");
+                    return;
+                  }
+                  for (let x = atPosition - 1; x < email.length; x++)
+                    if (email[x] == '.')
+                      counter++;
+                  if (counter < 1) {
+                    alert("Please enter a valid email address!");
+                    return;
+                  }
+
+                  /*let patt = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%&]/g;
+                  if (!patt.test(username)) {
+                    alert("Username must be a combination of Uppercase, Lowercase and Numbers!");
+                    return;
+                  }*/
+
+                  document.getElementById("UserProfileDataSave").style.display = "inline";
+                  document.getElementById("UserProfileDataCheck").style.display = "none";
+
+                }
+              </script>
+
+              <br />
+              <br />
+
+              <script>
+                const GetUserInformation = () => {
+
+                  const token = localStorage.getItem("token");
+
+                  fetch("/api/auth", {
+                      method: 'GET',
+                      headers: {
+                        'Authorization': token
+                      }
+                    })
+                    .then(res => {
+                      if (res.status == 200)
+                        return res.json();
+                      else
+                        alert("An error occured please try again!");
+                    })
+                    .then(data => {
+                      //Header tag
+
+                      console.log(data);
+
+                      document.getElementById("header-userinfo").innerHTML =
+                        `${data.user.firstname} ${data.user.lastname}`;
+                      //Textboxes
+                      document.getElementById("p-name").value = data.user.firstname;
+                      document.getElementById("p-surname").value = data.user.lastname;
+                      document.getElementById("p-username").value = data.user.username;
+                      document.getElementById("p-email").value = data.user.email;
+                      //Save _id - user id
+                      localStorage.setItem("UserId", data.user._id);
+
+
+                    })
+                    .catch(error => {
+                      alert(`An error occured! ${error}`);
+                    });
+
+                }
+
+                GetUserInformation();
+
+                const UserSaveProfile = () => {
+                  const name = document.getElementById("p-name").value;
+                  const surname = document.getElementById("p-surname").value;
+                  const username = document.getElementById("p-username").value;
+                  const email = document.getElementById("p-email").value;
+                  const userid = localStorage.getItem("UserId");
+                  const token = localStorage.getItem("token");
+
+                  if (!name || !surname || !email || !username) {
+                    alert("All fields are required");
+                    return;
+                  }
+
+                  fetch(`/api/user/${userid}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Authorization': token,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        id:userid,
+                        firstname: name,
+                        lastname: surname,
+                        username: username,
+                        email:email
+                      })
+                    })
+                    .then(res => {
+                      if (res.status == 200)
+                        return res.json();
+                      else
+                        alert("An error occured please try again!");
+                    })
+                    .then(data => {
+                      //Header tag
+
+                      console.log(data);
+                      alert("Profile updated!");
+
+
+                    })
+                    .catch(error => {
+                      alert(`An error occured! ${error}`);
+                    });
+
+
+                }
+              </script>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <%- include ('admin/admin-footer.ejs') %>
+    </div>
+  </div>
+</div>
+<%- include ('admin/load-scripts.ejs') %>
+</body>
+
+</html>
