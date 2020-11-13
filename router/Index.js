@@ -7,6 +7,7 @@ router.get("/", indexRouter.LandingPage);
 router.get("/login", indexRouter.LoginPage);
 router.get("/profile", indexRouter.ProfilePage);
 router.get("/explore", indexRouter.ExplorePage);
+router.get("/search", indexRouter.SearchPage);
 
 // On post request
 
