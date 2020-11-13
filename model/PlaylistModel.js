@@ -6,7 +6,6 @@ const PlaylistSchema = new Schema({
   _deezerPId: { type: Number },
   type: { type: String },
   users: { type: Array, default: [] },
-  tracks: { type: Array, default: [] },
   created_at: Date,
 });
 
