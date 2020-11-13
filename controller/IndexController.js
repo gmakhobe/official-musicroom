@@ -21,3 +21,7 @@ exports.ExplorePage = (req, res) => {
     return res.render('Storage/explore', { title: Title});
 }
 
+exports.SearchPage = (req, res) => {
+    return res.render('Storage/search', { title: Title});
+}
+

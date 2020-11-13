@@ -1,0 +1,387 @@
+<!-- partial:header -->
+<%- include ('admin/admin-header.ejs') %>
+<div class="container-scroller">
+  <!-- partial:top nav bar -->
+  <%- include ('admin/top-nav.ejs') %>
+  <div class="container-fluid page-body-wrapper">
+    <!-- partial:top side bar -->
+    <%- include ('admin/side-nav.ejs') %>
+    <div class="main-panel">
+      <div class="content-wrapper">
+
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+
+              <form method="POST" action="/user/library/search">
+                <input name="Name" class="form-control" type="text" placeholder="Search..." required /><br>
+                <button type="submit" class="btn btn-gradient-dark">Search for movie</button>
+              </form>
+
+              <hr />
+
+              <div class="row">
+                <div class="col-sm-6">
+
+                  <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Sort By Name
+                      <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                      <li><a href="#" onclick="sortByNameAsc();loadFirstBatch();">A to Z</a></li>
+                    </ul>
+                  </div>
+
+                </div>
+                <div class="col-sm-6">
+
+                  <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Sort By Release Date
+                      <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                      <li><a href="#" onclick="sortByDateAsc();loadFirstBatch();">New to Old</a></li>
+                    </ul>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+
+            <style>
+              .movie-block {
+                text-align: center;
+              }
+            </style>
+
+            <div class="card-body" id="movies-container">
+
+              <   % if (!fromSearch) { %>
+              <div class="row">
+
+                < % for (let movie of movies) { %>
+
+                <div class="col-sm-4 movie-block">
+
+                  <form method="POST" action="/user/video/< % = movie.Name %>">
+
+                    <input value="< %= movie.Name %>" name="Name" hidden/>
+
+                  <img class="img-thumbnail movie-block-img" src="< % = movie.Poster_Path %>"
+                    style="height:auto;width:100%" />
+
+                  <br>
+
+                  <h3 class="movie-block-name">< %= movie.Name %></h3>
+
+                  <p>
+                    Rating: <span class="movie-block-vote">< %= movie.Vote %></span><br>
+                    Release year: <span class="movie-block-date">< %= movie.Date %></span>
+                  </p>
+
+                  <center>
+                    <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
+                  </center>
+
+                  </form>
+
+                </div>
+
+                < % } %>
+              </div>
+              < % }else{ %>
+
+              <div class="row">
+
+                < % for (let movie of movies) { %>
+
+                <div class="col-sm-4 movie-block">
+
+                  <form method="POST" action="/user/video/< %= movie.Name %>">
+
+                    <input value="<  %= movie.Name %>" name="Name" hidden/>
+
+                  <img class="img-thumbnail movie-block-img" src="< %= movie.Poster_Path %>"
+                    style="height:auto;width:100%" />
+
+                  <br>
+
+                  <h3 class="movie-block-name">< %= movie.Name %></h3>
+
+                  <p>
+                    Rating: <span class="movie-block-vote"><  %= movie.Vote %></span><br>
+                    Release year: <span class="movie-block-date">< %= movie.Date %></span>
+                  </p>
+
+                  < % if (movie.Name != "No data found!"){ %>
+                  <center>
+                    <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
+                  </center>
+                  < % } %>
+
+                  </form>
+
+                </div>
+
+                < % } %>
+              </div>
+
+              < % }%>
+
+              <center>
+                <br>
+                <button class="btn btn-gradient-info" id="thumbnailsPagination">Found Less than 6 Movies</button>
+                <button class="btn btn-gradient-primary" id="thumbnailsPaginationPrevious"
+                  onclick="loadPreviousBatch()">Previous 3</button>
+                <button class="btn btn-gradient-primary" id="thumbnailsPaginationNext" onclick="loadNextBatch()">Next
+                  3</button>
+                <br>
+              </center>
+
+            </div>
+          </div>
+        </div>
+
+        < % if (!fromSearch) { %>
+
+          <div class="col-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h3>Seen Movies</h3>
+
+                  <div class="row">
+    
+                    < % for (let seenMovie of SeenMovies) { %>
+    
+                    <div class="col-sm-4">
+    
+                      <form method="POST" action="/user/video/< %= seenMovie.MovieName %>">
+    
+                        <input value="< %= seenMovie.MovieName %>" name="Name" hidden/>
+    
+                      <img class="img-thumbnail" src="< %= seenMovie.MovieURL %>"
+                        style="height:auto;width:100%" />
+    
+                      <br>
+    
+                      <h3 class="movie-block-name">< %= seenMovie.MovieName %></h3>
+    
+                      <center>
+                        <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
+                      </center>
+    
+                      </form>
+    
+                    </div>
+    
+                    < % } %>
+                  </div>
+
+              </div>
+            </div>
+          </div>
+
+        < % } %>
+
+        <script>
+
+          function getListOfMovies() {
+            var $movieThumbnail = document.getElementsByClassName("movie-block");
+            var movieName = document.getElementsByClassName("movie-block-name");
+            var movieDate = document.getElementsByClassName("movie-block-date");
+            var movieRating = document.getElementsByClassName("movie-block-vote");
+            var movieSRC = document.getElementsByClassName("movie-block-img");
+            var $movieList = [];
+            var counter = 0;
+            var mDate = "";
+            var mDateFull = "";
+
+            for (let $index = 0; $index < $movieThumbnail.length; $index++) {
+
+              mDate = movieDate[counter].innerHTML;
+              mDateFull = mDate[0] + "" + mDate[1] + "" + mDate[2] + "" + mDate[3] + "" + mDate[5] + "" + mDate[6] + "" + mDate[8] + "" + mDate[9];
+
+            
+
+              $movieList.push({
+                Name: movieName[counter].innerHTML,
+                Vote: movieRating[counter].innerHTML,
+                Date: movieDate[counter].innerHTML,
+                DateNum: parseInt(mDateFull),
+                Poster_Path: movieSRC[counter].src
+              });
+              counter++;
+            }
+
+            return $movieList;
+          }
+
+          const sort_by = (field, reverse, primer) => {
+
+            const key = primer ?
+              function (x) {
+                return primer(x[field])
+              } :
+              function (x) {
+                return x[field]
+              };
+
+            reverse = !reverse ? 1 : -1;
+
+            return function (a, b) {
+              return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+            }
+          }
+
+          function hideAllMovies() {
+            var $movieThumbnail = document.getElementsByClassName("movie-block");
+
+            for (let $index = 0; $index < $movieThumbnail.length; $index++) {
+              $movieThumbnail[$index].style.display = "none";
+            }
+
+            document.getElementById("thumbnailsPagination").style.display = "none";
+            document.getElementById("thumbnailsPaginationPrevious").style.display = "none";
+            document.getElementById("thumbnailsPaginationNext").style.display = "none";
+          }
+          //Call for hiding everything
+          //hideAllMovies();
+
+          //Load first batch
+          function loadFirstBatch() {
+            //Hide everything first
+            hideAllMovies();
+            var $movieThumbnail = document.getElementsByClassName("movie-block");
+            var $len = $movieThumbnail.length;
+            var $index = 0;
+            //Load only 3 if the length is <=
+            if ($len <= 3) {
+              while ($index < $len) {
+                $movieThumbnail[$index].style.display = "inline";
+                $index++;
+              }
+              document.getElementById("thumbnailsPagination").style.display = "inline";
+            } else {
+              //load 3 if the length is >= and display next btn
+              while ($index < $len) {
+                if ($index <= 2) {
+                  $movieThumbnail[$index].style.display = "inline";
+                  localStorage.setItem("lastdisplayPage", $index);
+                }
+                $index++;
+              }
+              document.getElementById("thumbnailsPaginationNext").style.display = "inline";
+            }
+
+          }
+          //Auto load first batch
+
+          //Load next batch
+          function loadNextBatch() {
+            //Hide everything first
+            hideAllMovies();
+
+            var $movieThumbnail = document.getElementsByClassName("movie-block");
+            var $len = $movieThumbnail.length;
+            var $lastElement = localStorage.getItem("lastdisplayPage");
+
+            var $start = Number($lastElement) + 1;
+            localStorage.setItem("firstdisplayPage", $start);
+            var $end = $start + 3;
+            while ($start < $end) {
+              if ($start < $len) {
+                $movieThumbnail[$start].style.display = "";
+              }
+              localStorage.setItem("lastdisplayPage", $start);
+              $start++;
+            }
+            if ($end > $len) {
+              document.getElementById("thumbnailsPaginationPrevious").style.display = "inline";
+              document.getElementById("thumbnailsPaginationNext").style.display = "none";
+            } else {
+              document.getElementById("thumbnailsPaginationPrevious").style.display = "inline";
+              document.getElementById("thumbnailsPaginationNext").style.display = "inline";
+            }
+          }
+
+          function loadPreviousBatch() {
+            //Hide everything first
+            hideAllMovies();
+
+            var $movieThumbnail = document.getElementsByClassName("movie-block");
+            var $len = $movieThumbnail.length;
+
+            var $firstElement = localStorage.getItem("firstdisplayPage");
+            var $lastElement = localStorage.getItem("lastdisplayPage");
+
+            $start = Number($firstElement) - 3;
+            $end = Number($firstElement) - 1;
+            localStorage.setItem("firstdisplayPage", $start);
+
+            if ($start != 0) {
+              document.getElementById("thumbnailsPaginationPrevious").style.display = "inline";
+              document.getElementById("thumbnailsPaginationNext").style.display = "inline";
+            } else {
+              document.getElementById("thumbnailsPaginationNext").style.display = "inline";
+            }
+
+            while ($start <= $end) {
+              $movieThumbnail[$start].style.display = "";
+              $start++;
+            }
+            localStorage.setItem("lastdisplayPage", $end);
+          }
+
+          function ShowMovies(arrList) {
+            const mainContainer = document.getElementById("movies-container");
+            let display = '<div class="row">';
+            for (let index = 0; index < arrList.length; index++) {
+              display += `<div class="col-sm-4 movie-block"><form method="POST" action="/user/video/${arrList[index].Name}"><input value="${arrList[index].Name}" name="Name" hidden/><img class="img-thumbnail movie-block-img" src="${arrList[index].Poster_Path}" style="height:auto;width:100%" /><br><h3 class="movie-block-name">${arrList[index].Name}</h3><p>Rating: <span class="movie-block-vote">${arrList[index].Vote}</span><br>Release year: <span class="movie-block-date">${arrList[index].Date}</span></p><center><button type="submit" class="btn btn-gradient-info btn-block">View Movie</button></center></form></div>`;
+            }
+
+            display += '</div><center><br><button class="btn btn-gradient-info" id="thumbnailsPagination">Found Less than 6 Movies</button><button class="btn btn-gradient-primary" id="thumbnailsPaginationPrevious"onclick="loadPreviousBatch()">Previous 3</button><button class="btn btn-gradient-primary" id="thumbnailsPaginationNext" onclick="loadNextBatch()">Next 3</button><br></center>';
+            mainContainer.innerHTML = display;
+
+          }
+
+          //Sort by name
+          function sortByNameAsc() {
+            let arrList = getListOfMovies();
+
+            // Sort by price high to low
+            ShowMovies(arrList.sort(sort_by('Name', false, (a) => a.toUpperCase()
+            )));
+
+          }
+          //Sort by Date
+          function sortByDateAsc() {
+            let arrList = getListOfMovies();
+
+            // Sort by price high to low
+            ShowMovies(arrList.sort(sort_by('DateNum', true, parseInt)));
+          }
+        </script>
+
+        < % if (!fromSearch) { %>
+        <script>
+          //loadFirstBatch();
+        </script>
+        < % }else{ %>
+        <script>
+          ////sortByNameAsc();
+          //loadFirstBatch();
+        </script>
+        < % } %>
+
+        <%- include ('admin/admin-footer.ejs') %>
+      </div>
+    </div>
+  </div>
+  <%- include ('admin/load-scripts.ejs') %>
+  </body>
+
+  </html>
