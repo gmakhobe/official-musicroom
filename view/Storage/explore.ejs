@@ -224,7 +224,10 @@
               </script>
 
               <script>
-                /* Create a playlist */
+				/* Create a playlist */
+				
+				const socket = io('/api/playlist');
+
                 const CreatePlaylist = () => {
                   const title = document.getElementById("c-playlist-title").value;
                   const type = document.getElementById("c-playlist-type").value;
@@ -232,17 +235,16 @@
                   const DToken = localStorage.getItem("deezerToken");
                   const userid = localStorage.getItem("_id");
 
-                  const socket = io('/api/playlist');
                   socket.emit('create playlist', {
                     _deezerId: DId,
-                    _deezerToken: DToken,
+                    deezerToken: DToken,
                     title: title,
                     type: type,
                     userId: userid
                   });
                 }
 
-                const socket = io('/api/playlist');
+                
                 
                 socket.on("create playlist error", (message) => {
                   alert(message);
@@ -252,7 +254,7 @@
                   alert(message);
                 });
 
-                socket.on("create playlist success", (message, playlist) => {
+                socket.on("create playlist success", ({message, playlist}) => {
                   alert(message);
                 });
               </script>
