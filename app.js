@@ -12,6 +12,9 @@ const authRouter = require("./router/authRouter");
 const userRouter = require("./router/userRouter");
 const playlistRouter = require("./router/playlistRouter")
 const app = express();
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
+
 const port = 5000;
 
 // MongoDB Connection
@@ -63,7 +66,14 @@ app.use("/api/user", userRouter.router);
 app.use("/api/playlist", playlistRouter.router);
 // End Use routers
 
+
+io.of("/api/playlist").on("connection", (socket) => {
+	socket.emit("welcome", "this was just a test")
+})
+
+
+
 //App should listen to request on port ${port}
-app.listen(port, () => {
+http.listen(port, () => {
     console.log(`Go to http://localhost:${port} on your browser`)
 });
