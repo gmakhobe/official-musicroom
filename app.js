@@ -102,7 +102,7 @@ io.of("/api/playlist").on("connection", (socket) => {
                   { _id: playlist._id },
                   {
                     $push: {
-                      users: { id: req.user._id, role: "RW", creator: true },
+                      users: { id: playlistInfo.userId, role: "RW", creator: true },
                     },
                   },
                   { new: true },
