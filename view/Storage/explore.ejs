@@ -217,8 +217,10 @@
               <%- include ('admin/admin-footer.ejs') %>
 
               <script>
-                const socket = io('/api/playlist');
-                console.log(socket);
+                
+                socket.on("welcome", (msg) => {
+                  console.log(msg);
+                });
               </script>
 
               <script>
@@ -226,40 +228,33 @@
                 const CreatePlaylist = () => {
                   const title = document.getElementById("c-playlist-title").value;
                   const type = document.getElementById("c-playlist-type").value;
-                  const token = localStorage.getItem("token");
+                  const DId = localStorage.getItem("_deezerId");
+                  const DToken = localStorage.getItem("deezerToken");
+                  const userid = localStorage.getItem("_id");
 
-                  fetch(`/api/playlist/create`, {
-                      method: 'POST',
-                      headers: {
-                        'Authorization': token,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        title: title,
-                        type: type
-                      })
-                    })
-                    .then(res => {
-                      if (res.status == 200)
-                        return res.json();
-                      else
-                        alert("An error occured please try again!");
-                    })
-                    .then(data => {
-                      //Header tag
-                      if(data.success){
-                        alert("Playlist Created!");
-                        location.assign("/explore");
-                      }else{
-                        alert(data.message);
-                      }
-
-                    })
-                    .catch(error => {
-                      alert(`An error occured! ${error}`);
-                    });
+                  const socket = io('/api/playlist');
+                  socket.emit('create playlist', {
+                    _deezerId: DId,
+                    _deezerToken: DToken,
+                    title: title,
+                    type: type,
+                    userId: userid
+                  });
                 }
+
+                const socket = io('/api/playlist');
+                
+                socket.on("create playlist error", (message) => {
+                  alert(message);
+                });
+
+                socket.on("server error", (message) => {
+                  alert(message);
+                });
+
+                socket.on("create playlist success", (message, playlist) => {
+                  alert(message);
+                });
               </script>
       </div>
     </div>
