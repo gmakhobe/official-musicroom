@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
 const keys = require("./config/keys");
 const authRouter = require("./router/authRouter");
 const userRouter = require("./router/userRouter");
+const playlistRouter = require("./router/playlistRouter")
 const app = express();
 const port = 5000;
 
@@ -59,6 +60,7 @@ app.use(require("./router/Index"));
 
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
+app.use("/api/playlist", playlistRouter.router);
 // End Use routers
 
 //App should listen to request on port ${port}
