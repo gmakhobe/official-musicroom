@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const keys = require("./config/keys");
 const authRouter = require("./router/authRouter");
 const userRouter = require("./router/userRouter");
+const searchRouter = require("./router/searchRouter");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
@@ -63,6 +64,7 @@ app.use(require("./router/Index"));
 
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
+app.use("/api/search", searchRouter.router);
 
 // End Use routers
 
