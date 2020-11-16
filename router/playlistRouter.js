@@ -6,11 +6,12 @@ const controllerPlaylist = require("../controller/PlaylistController");
 exports.router = (() => {
   const playlistRouter = express.Router();
 
-  playlistRouter.post(
-    "/create",
-    passport.authenticate("jwt", { session: false }),
-    controllerPlaylist.createPlaylist
+  playlistRouter.get(
+    "/",
+	passport.authenticate("jwt", { session: false }),
+	controllerPlaylist.getPlaylists
   );
+
 
   return playlistRouter;
 })();
