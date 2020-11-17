@@ -1,41 +1,47 @@
-<!-- partial:header -->
-<%- include ('admin/admin-header.ejs') %>
-<div class="container-scroller">
-  <!-- partial:top nav bar -->
-  <%- include ('admin/top-nav.ejs') %>
-  <div class="container-fluid page-body-wrapper">
-    <!-- partial:top side bar -->
-    <%- include ('admin/side-nav.ejs') %>
-    <div class="main-panel">
-      <div class="content-wrapper">
-        <div class="col-12 grid-margin stretch-card">
-          <div class="card">
-            <div class="card-body">
-              <!-- req.query.type, req.query.query -->
-              <div class="dropdown">
-                <form onsubmit="searchMusic()" method="GET">
-                  <label for="searchBy" class="text">Sort by :</label>
-                  <select v-model="searchBy" class="btn buttons dropdown-toggle" id="type" name="type">
-                    /
-                    <option value="album">Album</option>
-                    <option value="artist">Artist</option>
-                    <option value="track">Music</option>
-                    <input type="text" placeholder="Search.." name="q" id="q">
-                    <button type="submit" >Submit</button>
-              </div>
-              </form>
-              <% for(var i=0; i < results.length; i++) { %>
-                <div class="col-md-auto mb-4">
-                    <div class="card matches mx-auto" style="width: 18rem; height: 24rem;">
-                        <div class="card-body">
-                            <h5 class="card-title"><%= results[i].name %></h5>
-                            <p class="card-text"><%= results[i].type %></p>
-                            <p class="card-text"><%= results[i].city %></p>
-                        </div>
-                    </div>
-                </div>
-             <% } %>
-              <br>
-              <script>
-                seacrhMusic()
-              </script>
+<div class="col-12 grid-margin stretch-card">
+  <div class="card">
+    <div class="card-body">
+
+      <div class="form-group">
+        <input id="playlistSearch" class="form-control" type="text" placeholder="Search..." /><br>
+        <select class="form-control" id="playlistType">
+          <option value="album">Album</option>
+          <option value="artist">Artist</option>
+          <option value="track">Track</option>
+        </select>
+        <button onclick="playlistSearch()" class="btn btn-gradient-dark">Search for playlist</button>
+      </div>
+
+      <script>
+        const playlistSearch = () => {
+          const search = document.getElementById("playlistSearch").value;
+          const type = document.getElementById("playlistType").value;
+          const token = localStorage.getItem("token");
+
+          fetch(`/api/search?type=${type}&q=${search}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': token
+              }
+            })
+            .then(res => {
+              if (res.status == 200)
+                return res.json();
+              else
+                alert("An error occured please try again!");
+            })
+            .then(data => {
+              //Header tag
+
+              console.log("Search response", data);
+            })
+            .catch(error => {
+              alert(`An error occured! ${error}`);
+            });
+
+        }
+      </script>
+
+    </div>
+  </div>
+</div>

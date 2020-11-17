@@ -49,20 +49,9 @@
           </div>
         </div>
 
-        <div class="col-12 grid-margin stretch-card">
-          <div class="card">
-            <div class="card-body">
-
-              <form method="POST" action="/user/library/search">
-                <input name="Name" class="form-control" type="text" placeholder="Search..." required /><br>
-                <button type="submit" class="btn btn-gradient-dark">Search for mu</button>
-              </form>
-
-              <hr />
-
-            </div>
-          </div>
-        </div>
+        <!-- Start: Search
+        < % - include ('search.ejs') %>
+         End: Search -->
 
         <div class="col-12 grid-margin stretch-card">
           <div class="card">
@@ -74,190 +63,220 @@
             </style>
 
             <div class="card-body" id="movies-container">
+              <h2>Public Playlist</h2>
 
-              < % if (!fromSearch) { %>
-                <div class="row">
+              <div class="row" id="publicPlaylist">
 
-                  < % for (let movie of movies) { %>
+                <div class="col-sm-4 movie-block">
 
-                    <div class="col-sm-4 movie-block">
+                  <div>
 
-                      <form method="POST" action="/user/video/< % = movie.Name %>">
+                    <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                      style="height:auto;width:100%" />
 
-                        <input value="< %= movie.Name %>" name="Name" hidden />
+                    <br>
 
-                        <img class="img-thumbnail movie-block-img" src="< % = movie.Poster_Path %>"
-                          style="height:auto;width:100%" />
-
-                        <br>
-
-                        <h3 class="movie-block-name">
-                          < %=movie.Name %>
-                        </h3>
-
-                        <p>
-                          Rating: <span class="movie-block-vote">
-                            < %=movie.Vote %>
-                          </span><br>
-                          Release year: <span class="movie-block-date">
-                            < %=movie.Date %>
-                          </span>
-                        </p>
-
-                        <center>
-                          <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
-                        </center>
-
-                      </form>
-
-                    </div>
-
-                    < % } %>
-                </div>
-                < % }else{ %>
-
-                  <div class="row">
-
-                    < % for (let movie of movies) { %>
-
-                      <div class="col-sm-4 movie-block">
-
-                        <form method="POST" action="/user/video/< %= movie.Name %>">
-
-                          <input value="<  %= movie.Name %>" name="Name" hidden />
-
-                          <img class="img-thumbnail movie-block-img" src="< %= movie.Poster_Path %>"
-                            style="height:auto;width:100%" />
-
-                          <br>
-
-                          <h3 class="movie-block-name">
-                            < %=movie.Name %>
-                          </h3>
-
-                          <p>
-                            Rating: <span class="movie-block-vote">
-                              < %=movie.Vote %>
-                            </span><br>
-                            Release year: <span class="movie-block-date">
-                              < %=movie.Date %>
-                            </span>
-                          </p>
-
-                          < % if (movie.Name !="No data found!" ){ %>
-                            <center>
-                              <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
-                            </center>
-                            < % } %>
-
-                        </form>
-
-                      </div>
-
-                      < % } %>
-                  </div>
-
-                  < % }%>
+                    <h3 class="movie-block-name">
+                      No Playlist
+                    </h3>
 
                     <center>
-                      <br>
-                      <button class="btn btn-gradient-info" id="thumbnailsPagination">Found Less than 6 Movies</button>
-                      <button class="btn btn-gradient-primary" id="thumbnailsPaginationPrevious"
-                        onclick="loadPreviousBatch()">Previous 3</button>
-                      <button class="btn btn-gradient-primary" id="thumbnailsPaginationNext"
-                        onclick="loadNextBatch()">Next
-                        3</button>
-                      <br>
+                      <button type="submit" class="btn btn-gradient-info btn-block">Create A Public Playlist</button>
                     </center>
+
+                  </div>
+
+                </div>
+
+              </div>
 
             </div>
           </div>
         </div>
 
-        < % if (!fromSearch) { %>
 
-          <div class="col-12 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
-                <h3>Seen Movies</h3>
+        <div class="col-12 grid-margin stretch-card">
+          <div class="card">
+            <div class="card-body">
+              <h2>Private Playlist</h2>
 
-                <div class="row">
+              <div class="row" id="privatePlaylist">
 
-                  < % for (let seenMovie of SeenMovies) { %>
+                <div class="col-sm-4 movie-block">
 
-                    <div class="col-sm-4">
+                  <div>
 
-                      <form method="POST" action="/user/video/< %= seenMovie.MovieName %>">
+                    <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                      style="height:auto;width:100%" />
 
-                        <input value="< %= seenMovie.MovieName %>" name="Name" hidden />
+                    <br>
 
-                        <img class="img-thumbnail" src="< %= seenMovie.MovieURL %>" style="height:auto;width:100%" />
+                    <h3 class="movie-block-name">
+                      No Playlist
+                    </h3>
 
-                        <br>
+                    <center>
+                      <button type="submit" class="btn btn-gradient-info btn-block">Create A Private Playlist</button>
+                    </center>
 
-                        <h3 class="movie-block-name">
-                          < %=seenMovie.MovieName %>
-                        </h3>
+                  </div>
 
-                        <center>
-                          <button type="submit" class="btn btn-gradient-info btn-block">View Movie</button>
-                        </center>
-
-                      </form>
-
-                    </div>
-
-                    < % } %>
                 </div>
 
               </div>
+
             </div>
           </div>
+        </div>
 
-              <%- include ('admin/admin-footer.ejs') %>
+        <script src="/socket.io/socket.io.js"></script>
 
-              <script>
-                
-                socket.on("welcome", (msg) => {
-                  console.log(msg);
-                });
-              </script>
+        <script>
+          const token = localStorage.getItem("token");
+          const userId = localStorage.getItem("_id");
+          const socket = io('/api/playlist');
 
-              <script>
-				/* Create a playlist */
-				
-				const socket = io('/api/playlist');
+          socket.on("get all playlist", (data) => {
 
-                const CreatePlaylist = () => {
-                  const title = document.getElementById("c-playlist-title").value;
-                  const type = document.getElementById("c-playlist-type").value;
-                  const DId = localStorage.getItem("_deezerId");
-                  const DToken = localStorage.getItem("deezerToken");
-                  const userid = localStorage.getItem("_id");
+            console.log("Data from DB", data);
 
-                  socket.emit('create playlist', {
-                    _deezerId: DId,
-                    deezerToken: DToken,
-                    title: title,
-                    type: type,
-                    userId: userid
-                  });
-                }
+            const playlist = data.playLists;
+            const playlistNum = data.playLists.length;
+            const publicView = document.getElementById("publicPlaylist");
+            const privateView = document.getElementById("privatePlaylist");
 
-                
-                
-                socket.on("create playlist error", (message) => {
-                  alert(message);
-                });
+            publicView.innerHTML = "";
+            privateView.innerHTML = "";
 
-                socket.on("server error", (message) => {
-                  alert(message);
-                });
+            for (let index = 0; index < playlistNum; index++) {
+              if (playlist[index].type == "public") {
+                publicView.innerHTML += `
+                    
+                    <div class="col-sm-4 movie-block" onclick="RedirectToPlaylist('${playlist[index]._deezerPId}', '${playlist[index].type}')">
 
-                socket.on("create playlist success", ({message, playlist}) => {
-                  alert(message);
-                });
-              </script>
+                    <div>
+                    
+                      <input value=">" name="Name" hidden />
+                    
+                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                        style="height:auto;width:100%" />
+                    
+                      <br>
+                    
+                      <h3 class="movie-block-name">
+                        ${playlist[index].name}
+                      </h3>
+                    
+                      <p>
+                        Created Date: <span class="movie-block-date">
+                          ${playlist[index].created_at}
+                        </span>
+                      </p>
+                    
+                      <center>
+                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
+                      </center>
+                    
+                    </div>
+
+</div>
+
+                    `;
+              } else {
+
+                privateView.innerHTML += `
+                    
+                    <div class="col-sm-4 movie-block" onclick="RedirectToPlaylist('${playlist[index]._deezerPId}', '${playlist[index].type}')">
+                    <div>
+                    
+                      <input value=">" name="Name" hidden />
+                    
+                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                        style="height:auto;width:100%" />
+                    
+                      <br>
+                    
+                      <h3 class="movie-block-name">
+                        ${playlist[index].name}
+                      </h3>
+                    
+                      <p>
+                        Created Date: <span class="movie-block-date">
+                          ${playlist[index].created_at}
+                        </span>
+                      </p>
+                    
+                      <center>
+                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
+                      </center>
+                    
+                    </div>
+                  </div>
+
+                    `;
+              }
+            }
+
+          });
+
+          socket.on("get all playlist error", (response) => {
+            alert(response.message);
+          });
+
+          const getPublicPlaylists_currentUserPrivate = () => {
+
+            socket.emit('get playlist', {
+              token: token,
+              userId: userId
+            });
+
+          }
+
+          getPublicPlaylists_currentUserPrivate();
+        </script>
+
+        <!--<script src="/socket.io/socket.io.js"></script>-->
+
+        <script>
+          /* Create a playlist */
+
+          const CreatePlaylist = () => {
+            const title = document.getElementById("c-playlist-title").value;
+            const type = document.getElementById("c-playlist-type").value;
+            const DId = localStorage.getItem("_deezerId");
+            const DToken = localStorage.getItem("deezerToken");
+            const userid = localStorage.getItem("_id");
+
+            socket.emit('create playlist', {
+              _deezerId: DId,
+              deezerToken: DToken,
+              title: title,
+              type: type,
+              userId: userid
+            });
+          }
+
+
+
+          socket.on("create playlist error", (message) => {
+            alert(message);
+          });
+
+          socket.on("server error", (message) => {
+            alert(message);
+          });
+
+          socket.on("create playlist success", ({
+            message,
+            playlist
+          }) => {
+            alert(message);
+          });
+
+          const RedirectToPlaylist = (id, type) => {
+            window.location.assign(`/playlist/${type}/${id}`);
+          }
+        </script>
       </div>
     </div>
   </div>

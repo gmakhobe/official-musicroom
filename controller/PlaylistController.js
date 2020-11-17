@@ -1,8 +1,46 @@
 const Playlist = require("../model/PlaylistModel");
 const axios = require("axios");
 
-
 module.exports = {
+  getPlaylists: (req, res) => {
+	  const parameters = {
+      userid: req.user._id
+    };
+    Playlist.find().then((lists) => {
+      if (lists.length > 0) {
+        const PlaylistArray = [];
+
+        lists.forEach((list) => {
+          list.users.forEach((userResponse) => {
+            if (
+              userResponse.id == parameters.userid &&
+              list.type == "private"
+            ) {
+              PlaylistArray.push(list);
+            }
+          });
+        });
+
+        lists.forEach((list) => {
+          if (list.type == "public") {
+            PlaylistArray.push(list);
+          }
+        });
+
+        return res.json({
+          success: true,
+          message: "Public and Private playlist from db",
+          playLists: PlaylistArray,
+        });
+      } else {
+        return res.json({
+          success: false,
+          message: "Playlist db empty",
+        });
+      }
+    });
+  },
+
   createPlaylist: (req, res) => {
     Playlist.findOne({
       name: req.body.title,
@@ -13,7 +51,6 @@ module.exports = {
             message: "Playlist with a name already exist!",
           });
         } else {
-
           const url = `https://api.deezer.com/user/${req.user._deezerId}/playlists?title=${req.body.title}&access_token=${req.user.deezerToken}`;
 
           axios
