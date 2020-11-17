@@ -150,7 +150,7 @@ io.of("/api/playlist").on("connection", (socket) => {
       _deezerPId: parameters["PId"],
     }).then((response) => {
       if (!response) {
-        socket.emit("add track error", {
+        return socket.emit("add track error", {
           message: "No playlist with that id found",
         });
       }
@@ -197,7 +197,7 @@ io.of("/api/playlist").on("connection", (socket) => {
         });
 
         if (!test) {
-          socket.emit("add track error", {
+          return socket.emit("add track error", {
             message: "You are not allowed to add track to this playlist",
           });
         }
