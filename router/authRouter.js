@@ -5,15 +5,26 @@ const passport = require("passport");
 //authRouter
 exports.router = (() => {
   const authRouter = express.Router();
-  
+
+  /**
+   * @api {GET} /api/auth Check user auth status
+   * @apiName isAuthenticated
+   * @apiGroup Authentication
+   *
+   * @apiDescription Checks if current user is authenticated
+   *
+   * @apiSuccess {Boolean} auth authenticated status.
+   * @apiSuccess {Object} user user object from bd.
+   */
+
   authRouter.get(
     "/",
     passport.authenticate("jwt", { session: false }),
     authHandler.isAuthenticated
   );
-  
+
   authRouter.get("/logout", authHandler.logout);
-  
+
   authRouter.get(
     "/login/facebook",
     passport.authenticate("facebook", { scope: ["email"] })
@@ -77,12 +88,32 @@ exports.router = (() => {
 
   authRouter.get(
     "/login/deezer",
-    passport.authenticate("deezer", {scope: ['basic_access', 'email' , 'offline_access', 'manage_library', 'manage_community', 'delete_library', 'listening_history']})
+    passport.authenticate("deezer", {
+      scope: [
+        "basic_access",
+        "email",
+        "offline_access",
+        "manage_library",
+        "manage_community",
+        "delete_library",
+        "listening_history",
+      ],
+    })
   );
 
   authRouter.get(
     "/link/deezer",
-    passport.authorize("deezer", {scope: ['basic_access', 'email' , 'offline_access', 'manage_library', 'manage_community', 'delete_library', 'listening_history']})
+    passport.authorize("deezer", {
+      scope: [
+        "basic_access",
+        "email",
+        "offline_access",
+        "manage_library",
+        "manage_community",
+        "delete_library",
+        "listening_history",
+      ],
+    })
   );
 
   authRouter.get(
