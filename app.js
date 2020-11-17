@@ -73,6 +73,53 @@ app.use("/api/explore", playlistRouter.router);
 io.of("/api/playlist").on("connection", (socket) => {
   socket.emit("welcome", "this was just a test");
 
+  socket.on("get playlist", (userInfo) => {
+
+    const parameters = {
+      userid: userInfo.userId
+    };
+
+    Playlist.find().then((lists) => {
+      if (lists.length > 0) {
+        const PlaylistArray = [];
+
+        lists.forEach((list) => {
+          list.users.forEach((userResponse) => {
+            if (
+              userResponse.id == parameters.userid &&
+              list.type == "private"
+            ) {
+              PlaylistArray.push(list);
+            }
+          });
+        });
+
+        lists.forEach((list) => {
+          if (list.type == "public") {
+            PlaylistArray.push(list);
+          }
+        });
+
+        socket.emit(
+          "get all playlist", {
+          success: true,
+          message: "Public and Private playlist from db",
+          playLists: PlaylistArray,
+        });
+
+      } else {
+        
+        socket.emit(
+          "get all playlist error", {
+          success: false,
+          message: "An error occured getting Public and Private playlist from db"
+        });
+        
+      }
+    });
+
+  });
+
   socket.on("create playlist", (playlistInfo) => {
     Playlist.findOne({ name: playlistInfo.title })
       .then((ExistingPlaylist) => {

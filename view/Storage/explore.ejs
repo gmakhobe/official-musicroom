@@ -49,9 +49,9 @@
           </div>
         </div>
 
-        <!-- Start: Search -->
-        <%- include ('search.ejs') %>
-        <!-- End: Search -->
+        <!-- Start: Search
+        < % - include ('search.ejs') %>
+         End: Search -->
 
         <div class="col-12 grid-margin stretch-card">
           <div class="card">
@@ -129,122 +129,113 @@
           </div>
         </div>
 
+        <script src="/socket.io/socket.io.js"></script>
+
         <script>
           const token = localStorage.getItem("token");
+          const userId = localStorage.getItem("_id");
+          const socket = io('/api/playlist');
+
+          socket.on("get all playlist", (data) => {
+
+            console.log("Data from DB", data);
+
+            const playlist = data.playLists;
+            const playlistNum = data.playLists.length;
+            const publicView = document.getElementById("publicPlaylist");
+            const privateView = document.getElementById("privatePlaylist");
+
+            publicView.innerHTML = "";
+            privateView.innerHTML = "";
+
+            for (let index = 0; index < playlistNum; index++) {
+              if (playlist[index].type == "public") {
+                publicView.innerHTML += `
+                    
+                    <div class="col-sm-4 movie-block" onclick="RedirectToPlaylist('${playlist[index]._deezerPId}', '${playlist[index].type}')">
+
+                    <div>
+                    
+                      <input value=">" name="Name" hidden />
+                    
+                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                        style="height:auto;width:100%" />
+                    
+                      <br>
+                    
+                      <h3 class="movie-block-name">
+                        ${playlist[index].name}
+                      </h3>
+                    
+                      <p>
+                        Created Date: <span class="movie-block-date">
+                          ${playlist[index].created_at}
+                        </span>
+                      </p>
+                    
+                      <center>
+                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
+                      </center>
+                    
+                    </div>
+
+</div>
+
+                    `;
+              } else {
+
+                privateView.innerHTML += `
+                    
+                    <div class="col-sm-4 movie-block" onclick="RedirectToPlaylist('${playlist[index]._deezerPId}', '${playlist[index].type}')">
+                    <div>
+                    
+                      <input value=">" name="Name" hidden />
+                    
+                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
+                        style="height:auto;width:100%" />
+                    
+                      <br>
+                    
+                      <h3 class="movie-block-name">
+                        ${playlist[index].name}
+                      </h3>
+                    
+                      <p>
+                        Created Date: <span class="movie-block-date">
+                          ${playlist[index].created_at}
+                        </span>
+                      </p>
+                    
+                      <center>
+                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
+                      </center>
+                    
+                    </div>
+                  </div>
+
+                    `;
+              }
+            }
+
+          });
+
+          socket.on("get all playlist error", (response) => {
+            alert(response.message);
+          });
 
           const getPublicPlaylists_currentUserPrivate = () => {
 
-            fetch(`/api/explore`, {
-                method: 'GET',
-                headers: {
-                  'Authorization': token
-                }
-              })
-              .then(res => {
-                if (res.status == 200)
-                  return res.json();
-                else
-                  alert("An error occured please try again!");
-              })
-              .then(data => {
-                const playlist = data.playLists;
-                const playlistNum = data.playLists.length;
-                const publicView = document.getElementById("publicPlaylist");
-                const privateView = document.getElementById("privatePlaylist");
+            socket.emit('get playlist', {
+              token: token,
+              userId: userId
+            });
 
-                publicView.innerHTML = "";
-                privateView.innerHTML = "";
-
-                for (let index = 0; index < playlistNum; index++) {
-                  if (playlist[index].type == "public") {
-                    publicView.innerHTML += `
-                    
-                    <div class="col-sm-4 movie-block">
-
-                    <div>
-                    
-                      <input value=">" name="Name" hidden />
-                    
-                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
-                        style="height:auto;width:100%" />
-                    
-                      <br>
-                    
-                      <h3 class="movie-block-name">
-                        ${playlist[index].name}
-                      </h3>
-                    
-                      <p>
-                        Created Date: <span class="movie-block-date">
-                          ${playlist[index].created_at}
-                        </span>
-                      </p>
-                    
-                      <center>
-                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
-                      </center>
-                    
-                    </div>
-
-</div>
-
-                    `;
-                  } else {
-
-                    privateView.innerHTML += `
-                    
-                    <div class="col-sm-4 movie-block">
-
-                    <div>
-                    
-                      <input value=">" name="Name" hidden />
-                    
-                      <img class="img-thumbnail movie-block-img" src="https://placeimg.com/500/500/any"
-                        style="height:auto;width:100%" />
-                    
-                      <br>
-                    
-                      <h3 class="movie-block-name">
-                        ${playlist[index].name}
-                      </h3>
-                    
-                      <p>
-                        Created Date: <span class="movie-block-date">
-                          ${playlist[index].created_at}
-                        </span>
-                      </p>
-                    
-                      <center>
-                        <button type="submit" class="btn btn-gradient-info btn-block">View Playlist</button>
-                      </center>
-                    
-                    </div>
-
-</div>
-
-                    `;
-
-                  }
-                }
-
-              })
-              .catch(error => {
-                alert(`An error occured! ${error}`);
-              });
           }
 
           getPublicPlaylists_currentUserPrivate();
         </script>
 
-        <script src="/socket.io/socket.io.js"></script>
-
-        <script>
-          const socket = io('/api/playlist');
-
-          socket.on("welcome", (msg) => {
-            console.log(msg);
-          });
-        </script>
+        <!--<script src="/socket.io/socket.io.js"></script>-->
 
         <script>
           /* Create a playlist */
@@ -281,6 +272,10 @@
           }) => {
             alert(message);
           });
+
+          const RedirectToPlaylist = (id, type) => {
+            window.location.assign(`/playlist/${type}/${id}`);
+          }
         </script>
       </div>
     </div>
