@@ -197,10 +197,40 @@ io.of("/api/playlist").on("connection", (socket) => {
         });
 
         if (!test) {
-          return res.status(403).send({
-            message: "User not permitted to the playlist",
+          socket.emit("add track error", {
+            message: "You are not allowed to add track to this playlist",
           });
         }
+
+        User.findOne({ _id: parameters.creatorId }).then((playlistCreator) => {
+          const creatorToken = playlistCreator.deezerToken;
+
+          //add track to dezeer playlist
+          const url = `https://api.deezer.com/playlist/${parameters.PId}/tracks?request_method=post&songs=${parameters.trackId}&access_token=${creatorToken}`;
+
+          axios
+            .get(url)
+            .then((result) => {
+              if (result) {
+                socket.emit("add track success", {
+                  message: "track successfully added",
+                  trackId: parameters.trackId,
+                });
+              } else {
+                console.log("could not add track bozza!!!");
+                socket.emit("add track error", {
+                  message: "could not add track",
+                });
+              }
+            })
+            .catch((err) => {
+              if (err) {
+                socket.emit("add track error", {
+                  message: "Track already added",
+                });
+              }
+            });
+        });
       }
     });
   });
