@@ -32,6 +32,7 @@
 <script>
 
     const UserLogout = () => {
+        localStorage.removeItem("_id");
         localStorage.removeItem("token");
         localStorage.removeItem("_deezerId");
         localStorage.removeItem("deezerToken");

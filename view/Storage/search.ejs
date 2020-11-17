@@ -5,8 +5,6 @@
       <div class="form-group">
         <input id="playlistSearch" class="form-control" type="text" placeholder="Search..." /><br>
         <select class="form-control" id="playlistType">
-          <option value="album">Album</option>
-          <option value="artist">Artist</option>
           <option value="track">Track</option>
         </select>
         <button onclick="playlistSearch()" class="btn btn-gradient-dark">Search for playlist</button>
@@ -17,6 +15,11 @@
           const search = document.getElementById("playlistSearch").value;
           const type = document.getElementById("playlistType").value;
           const token = localStorage.getItem("token");
+
+          if (!search || search.length < 2){
+            alert("Search filed required");
+            return ;
+          }
 
           fetch(`/api/search?type=${type}&q=${search}`, {
               method: 'GET',
@@ -31,9 +34,30 @@
                 alert("An error occured please try again!");
             })
             .then(data => {
-              //Header tag
+              const tracks = data.results;
 
-              console.log("Search response", data);
+              document.getElementById("MusicList").style.display = "inline";
+              document.getElementById("searchHeading").innerHTML = `Search results: "${search}"`;
+              let tList = document.getElementById('TrackList');
+              tList.innerHTML = "";
+
+              //Get PlaylistId, CreatorId, TrackId
+              const PlaylistId = document.getElementById("playlist-id").value, 
+              CreatorId = document.getElementById("creator-id").value;
+
+              //console.log("Searched Tracks:", data)
+
+              tracks.map( (track) => {
+
+                tList.innerHTML += `
+                  <a id="${track.id}" href="javascript:SendSongInfo('${PlaylistId}', '${CreatorId}', '${track.id}', '${track.title}')" class="list-group-item">
+                    <h3>${track.title}</h3>
+                    <p>${track.artist.name} - ${track.album.title}</p>
+                  </a>
+                `;
+
+              });
+              
             })
             .catch(error => {
               alert(`An error occured! ${error}`);
@@ -41,7 +65,59 @@
 
         }
       </script>
+      PlaylisId, SongId, CreatorId
 
     </div>
   </div>
 </div>
+
+<div class="col-12 grid-margin stretch-card" id="MusicList">
+  <div class="card">
+    <div class="card-body">
+
+      <h2 id="searchHeading">Search results: "*****"</h2>
+
+      <style>
+        .list-group-item:hover{
+          background-color: black;
+          color: white;
+        }
+      </style>
+
+      <div class="list-group" id="TrackList">
+        <a href="#" class="list-group-item">First item</a>
+        <a href="#" class="list-group-item">Second item</a>
+        <a href="#" class="list-group-item">Third item</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+  document.getElementById("MusicList").style.display = "none";
+
+  function SendSongInfo(pId, cId, tId, name){
+
+    //alert(`${pId} - ${cId} - ${tId}`);
+    alert(`Adding ${name} to playlist!`);
+    socket.emit('add track', {
+      PId: pId, trackId: tId, creatorId: cId
+    });
+    //Socket Implementation
+  }
+
+  socket.on('add track error', ({message}) => {
+    alert(message);
+  });
+
+  socket.on('add track success', ({message, trackId}) => {
+    alert(message);
+    document.getElementById(trackId).style.display = "none";
+
+    let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
+    document.getElementById("deezer-widget-player").setAttribute("data-src", source);
+  });
+
+</script>
