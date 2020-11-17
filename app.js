@@ -125,14 +125,14 @@ io.of("/api/playlist").on("connection", (socket) => {
   socket.on("playlist data", (_deezerPId) => {
 	  /* is it in db */
 
-	  Playlist.findOne({ _deezerPId }).then(async (playlistInfo) => {
-	  const url = `https://api.deezer.com/playlist/${playlistInfo._deezerPId}`;
-	  
-	
-	  const deezerPlaylist = await axios.get(url);
-	  socket.emit("playlist data success", [...playlistInfo, ...deezerPlaylist])
-	  
+	  Playlist.findOne({ _deezerPId: _deezerPId }).then(async (playlistInfo) => {
+      const url = `https://api.deezer.com/playlist/${playlistInfo._deezerPId}`;
 
+      const deezerPlaylist = await axios.get(url);
+      socket.emit("playlist data success", [
+        ...playlistInfo,
+        ...deezerPlaylist,
+      ]);
     });
   })
   socket.on("create playlist", (playlistInfo) => {
