@@ -65,6 +65,7 @@
               <button id="UserProfileDataSave" onclick="UserSaveProfile()" class="btn btn-gradient-success mr-2">Save
                 Profile</button>
 
+              <button id="UserProfileDataSave" action="/api/auth/unlink/deezer" onclick="unlinkDeezer()" class="btn btn-gradient-success mr-2">Unlink Deezer</button>
 
               <button id="UserProfileDataCheck" onclick="UserProfileDataCheck()"
                 class="btn btn-gradient-success mr-2">Check Before Saving</button>
@@ -139,8 +140,11 @@
 
               <script>
 
-                function LinkToDeezer(){
+                function LinkToDeezer() {
                   window.location.assign("/api/auth/link/deezer");
+                }
+                function UnlinkDeezer() {
+                  window.location.assign("/api/auth/unlink/deezer");
                 }
 
 
@@ -149,11 +153,11 @@
                   const token = localStorage.getItem("token");
 
                   fetch("/api/auth", {
-                      method: 'GET',
-                      headers: {
-                        'Authorization': token
-                      }
-                    })
+                    method: 'GET',
+                    headers: {
+                      'Authorization': token
+                    }
+                  })
                     .then(res => {
                       if (res.status == 200)
                         return res.json();
@@ -179,16 +183,16 @@
                         let response = confirm("Link with deezer!");
                         //console.log(response);
 
-                        if (response){
+                        if (response) {
 
                           LinkToDeezer();
 
                         }
 
-                      }else{
+                      } else {
 
                         localStorage.setItem("_deezerId", data.user._deezerId);
-                          localStorage.setItem("deezerToken", data.user.deezerToken);
+                        localStorage.setItem("deezerToken", data.user.deezerToken);
 
                       }
                     })
@@ -214,20 +218,20 @@
                   }
 
                   fetch(`/api/user/${userid}`, {
-                      method: 'PUT',
-                      headers: {
-                        'Authorization': token,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        id: userid,
-                        firstname: name,
-                        lastname: surname,
-                        username: username,
-                        email: email
-                      })
+                    method: 'PUT',
+                    headers: {
+                      'Authorization': token,
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      id: userid,
+                      firstname: name,
+                      lastname: surname,
+                      username: username,
+                      email: email
                     })
+                  })
                     .then(res => {
                       if (res.status == 200)
                         return res.json();

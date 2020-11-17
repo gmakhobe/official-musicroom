@@ -47,4 +47,14 @@ module.exports = {
     );
   },
 
+  unlink: (req, res) => {
+    var user = req.user;
+    req.user._deezerToken = null,
+      user.save(function (err) {
+        if (err)
+          throw err;
+        res.redirect('/profile');
+      }
+      )
+  },
 };
