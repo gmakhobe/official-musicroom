@@ -25,3 +25,7 @@ exports.SearchPage = (req, res) => {
     return res.render('Storage/search', { title: Title});
 }
 
+exports.PrivatePlalistPage = (req, res) => {
+    return res.render('Storage/private-playlist', { title: Title});
+}
+
