@@ -1,103 +1,157 @@
 <!-- partial:header -->
 <%- include ('admin/admin-header.ejs') %>
 <div class="container-scroller">
-  <!-- partial:top nav bar -->
-  <%- include ('admin/top-nav.ejs') %>
-  <div class="container-fluid page-body-wrapper">
-    <!-- partial:top side bar -->
-    <%- include ('admin/side-nav.ejs') %>
-    <div class="main-panel">
-      <div class="content-wrapper">
+    <!-- partial:top nav bar -->
+    <%- include ('admin/top-nav.ejs') %>
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:top side bar -->
+        <%- include ('admin/side-nav.ejs') %>
+        <div class="main-panel">
+            <div class="content-wrapper">
 
-        <!-- Start: Search
+                <script src="/socket.io/socket.io.js"></script>
+                <script>
+                    const socket = io('/api/playlist');
+                </script>
+
+                <!-- Start: Search
         <%- include ('search.ejs') %>
         End: Search -->
 
-        <div class="row">
-          <div class="col-12 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
                 <div class="row">
-                  <div class="col-6 pr-1">
-                    <img src="https://placeimg.com/500/500/any" class="mb-2 rounded" style="width:300px" alt="image">
-                  </div>
-                  <div class="col-6 pl-1">
-                    <h2><strong>Playlist Name</strong></h2>
-                    <p><strong>Username</strong></p>
-                  </div>
+                    <div class="col-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 pr-1">
+                                        <img id="PlalistPicture" src="https://placeimg.com/500/500/any"
+                                            class="mb-2 rounded" style="width:300px" alt="image">
+                                    </div>
+                                    <div class="col-6 pl-1">
+                                        <h2><strong><span id="PlalistName">Playlist Name</span></strong></h2>
+                                        <p><strong><span id="PlalistDate">Created Date</span></strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div class="row">
-          <div class="col-12 grid-margin">
-            <div class="card">
-              <div class="card-body">
-                <h4 class="card-title">Tracklist</h4>
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th> Track </th>
-                        <th> Artist </th>
-                        <th> Album </th>
-                        <th> Duration</th>
-                        <th> Actions(Play and Stop)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <img src="assets/images/faces/face4.jpg" class="mr-2" alt="image"> John Doe
-                        </td>
-                        <td> Loosing control on server </td>
-                        <td>
-                          <label class="badge badge-gradient-danger">REJECTED</label>
-                        </td>
-                        <td> Dec 3, 2017 </td>
-                        <td> WD-12348 </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <%- include ('search.ejs') %>
+
+                <input id="creator-id" type="text" hidden/>
+                <input id="playlist-id" type="text" hidden/>
+
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title">Tracklist</h4>
+                                <div class="table-responsive">
+                                    <!--
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th> Track </th>
+                                                <th> Artist </th>
+                                                <th> Album </th>
+                                                <th> Duration</th>
+                                                <th> Actions(Play and Stop)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <img src="assets/images/faces/face4.jpg" class="mr-2" alt="image">
+                                                    John Doe
+                                                </td>
+                                                <td> Loosing control on server </td>
+                                                <td>
+                                                    <label class="badge badge-gradient-danger">REJECTED</label>
+                                                </td>
+                                                <td> Dec 3, 2017 </td>
+                                                <td> WD-12348 </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    -->
+
+                                    <h3>Deezer Player</h3>
+                                    <div id="deezer-widget-player" class="deezer-widget-player"
+                                        data-src=""
+                                        data-scrolling="no" data-frameborder="0" data-allowTransparency="true"
+                                        data-width="100%" data-height="350"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+
+                <script>
+                    //Returns playlis id from url
+                    function returnPlaylistId() {
+                        let url = window.location.href;
+                        let arr = url.split("/");
+
+                        return (arr[arr.length - 1]);
+                    }
+
+                    const userId = localStorage.getItem("_id");
+                    const PlaylistId = returnPlaylistId();
+
+                    socket.emit('playlist data', {
+                        _deezerPId: PlaylistId
+                    })
+
+                    socket.on('playlist data success', (data) => {
+                        const infoDeezer = data.playlistDetails[1];
+                        const infoLocal = data.playlistDetails[0];
+
+                        document.getElementById("PlalistName").innerHTML = infoLocal.name;
+                        document.getElementById("PlalistDate").innerHTML = infoLocal.created_at;
+                        document.getElementById("PlalistPicture").src = infoDeezer.picture;
+                        document.getElementById("deezer-widget-player").setAttribute("data-src", `https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=true&width=700&height=350&color=EF5466&layout=&size=medium&type=playlist&id=${infoDeezer.id}&app_id=1`);
+
+                        console.log(document.getElementById("deezer-widget-player"));
+
+                        console.log("Local", infoLocal);
+                        console.log("Deezer", infoDeezer);
+                        infoLocal.users.map( user => {
+                            if (user.creator){
+                                document.getElementById("creator-id").value = user.id;
+                            }
+                        });
+
+                        document.getElementById("playlist-id").value = infoDeezer.id;
+
+                        var w = document[typeof document.getElementsByClassName === 'function' ?
+                            'getElementsByClassName' : 'querySelectorAll']('deezer-widget-player');
+                        for (var i = 0, l = w.length; i < l; i++) {
+                            w[i].innerHTML = '';
+                            var el = document.createElement('iframe');
+                            el.src = w[i].getAttribute('data-src');
+                            el.scrolling = w[i].getAttribute('data-scrolling');
+                            el.frameBorder = w[i].getAttribute('data-frameborder');
+                            el.setAttribute('frameBorder', w[i].getAttribute('data-frameborder'));
+                            el.allowTransparency = w[i].getAttribute('data-allowTransparency');
+                            el.width = w[i].getAttribute('data-width');
+                            el.height = w[i].getAttribute('data-height');
+                            w[i].appendChild(el);
+                        }
+
+
+                    });
+
+
+                    //console.log("Playlis Id;", returnPlaylistId());
+                </script>
+
+
             </div>
-          </div>
         </div>
-
-        <script src="/socket.io/socket.io.js"></script>
-
-        <script>
-            //Returns playlis id from url
-            function returnPlaylistId(){
-                let url = window.location.href;
-                let arr = url.split("/");
-
-                return (arr[arr.length - 1]);
-            }
-
-            const userId = localStorage.getItem("_id");
-            const socket = io('/api/playlist');
-            const PlaylistId = returnPlaylistId();
-
-            socket.emit('playlist data', {
-                _deezerPId: PlaylistId
-            })
-
-            socket.on('playlist data success', (data) => {
-                console.log(data);
-            })
-
-            //console.log("Playlis Id;", returnPlaylistId());
-        </script>
-
-    
-      </div>
     </div>
-  </div>
-  <%- include ('admin/load-scripts.ejs') %>
-  </body>
+    <%- include ('admin/load-scripts.ejs') %>
+    </body>
 
-  </html>
+    </html>
