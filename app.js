@@ -19,6 +19,8 @@ const axios = require("axios");
 
 const port = 5000;
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocs = require("./docs/swagger.json");
 // MongoDB Connection
 
 //DB Connection
@@ -62,7 +64,7 @@ app.use(passport.initialize());
 
 // Use routers
 app.use(require("./router/Index"));
-
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); 
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
 app.use("/api/search", searchRouter.router);
@@ -120,6 +122,19 @@ io.of("/api/playlist").on("connection", (socket) => {
 
   });
 
+  socket.on("playlist data", (_deezerPId) => {
+	  /* is it in db */
+
+	  Playlist.findOne({ _deezerPId }).then(async (playlistInfo) => {
+	  const url = `https://api.deezer.com/playlist/${playlistInfo._deezerPId}`;
+	  
+	
+	  const deezerPlaylist = await axios.get(url);
+	  socket.emit("playlist data success", [...playlistInfo, ...deezerPlaylist])
+	  
+
+    });
+  })
   socket.on("create playlist", (playlistInfo) => {
     Playlist.findOne({ name: playlistInfo.title })
       .then((ExistingPlaylist) => {
