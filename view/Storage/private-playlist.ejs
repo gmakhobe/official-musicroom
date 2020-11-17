@@ -67,6 +67,32 @@
           </div>
         </div>
 
+        <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+            //Returns playlis id from url
+            function returnPlaylistId(){
+                let url = window.location.href;
+                let arr = url.split("/");
+
+                return (arr[arr.length - 1]);
+            }
+
+            const userId = localStorage.getItem("_id");
+            const socket = io('/api/playlist');
+            const PlaylistId = returnPlaylistId();
+
+            socket.emit('playlist data', {
+                _deezerPId: PlaylistId
+            })
+
+            socket.on('playlist data success', (data) => {
+                console.log(data);
+            })
+
+            //console.log("Playlis Id;", returnPlaylistId());
+        </script>
+
     
       </div>
     </div>
