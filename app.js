@@ -21,6 +21,7 @@ const port = 5000;
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./docs/swagger.json");
+const User = require("./model/UserModel");
 // MongoDB Connection
 
 //DB Connection
@@ -125,11 +126,81 @@ io.of("/api/playlist").on("connection", (socket) => {
       axios
         .get(url)
         .then((deezerPlaylist) => {
-          socket.emit("playlist data success", {success: true, message: "Playlist info", playlistDetails :[playlistInfo, deezerPlaylist.data]});
+          socket.emit("playlist data success", {
+            success: true,
+            message: "Playlist info",
+            playlistDetails: [playlistInfo, deezerPlaylist.data],
+          });
         })
         .catch((err) => {
-          console.log("there was an err",err);
+          console.log("there was an err", err);
         });
+    });
+  });
+
+  //add track
+  socket.on("add track", (data) => {
+    const parameters = {
+      PId: data.PId,
+      trackId: data.trackId,
+      creatorId: data.creatorId,
+    };
+
+    Playlist.findOne({
+      _id: parameters["PId"],
+    }).then((response) => {
+      if (!response) {
+        socket.emit("add track error", {
+          message: "No playlist with that id found",
+        });
+      }
+
+      //is the playlist public?
+      if (response.type === "public") {
+        let creatorToken;
+        //get creator token
+        User.findById({ _id: parameters.creatorId })
+          .then((playlistCreator) => {
+            creatorToken = playlistCreator.deezerToken;
+          })
+          .catch();
+
+        //add track to dezeer playlist
+
+        const url = `https://api.deezer.com/playlist/${parameters.PId}/tracks?request_method=post&songs=${parameters.trackId}&access_token=${creatorToken}`;
+
+        axios
+          .get(url)
+          .then((result) => {
+            if (result) {
+              socket.emit("add track success", {
+                message: "track successfully added",
+                trackId: parameters.trackId,
+              });
+            }
+          })
+          .catch((err) => {
+            if (err) {
+              socket.emit("add track error", {
+                message: "Track already added",
+              });
+            }
+          });
+      } else {
+        let test = false;
+
+        response.users.forEach((user) => {
+          if (user.id == parameters["userid"] && user.role == "RW") {
+            test = true;
+          }
+        });
+
+        if (!test) {
+          return res.status(403).send({
+            message: "User not permitted to the playlist",
+          });
+        }
+      }
     });
   });
 
