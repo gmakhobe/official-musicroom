@@ -64,11 +64,11 @@
 
               <button id="UserProfileDataSave" onclick="UserSaveProfile()" class="btn btn-gradient-success mr-2">Save
                 Profile</button>
-
-              <button id="UserProfileDataSave" action="/api/auth/unlink/deezer" onclick="unlinkDeezer()" class="btn btn-gradient-success mr-2">Unlink Deezer</button>
-
               <button id="UserProfileDataCheck" onclick="UserProfileDataCheck()"
                 class="btn btn-gradient-success mr-2">Check Before Saving</button>
+                              
+              <button id="DeezerTokenUnlink" onclick="UnlinkDeezer()" class="btn btn-gradient-success mr-2">Unlink
+                Deezer</button>
 
               <script>
                 document.getElementById("UserProfileDataSave").style.display = "none";
@@ -143,10 +143,40 @@
                 function LinkToDeezer() {
                   window.location.assign("/api/auth/link/deezer");
                 }
-                function UnlinkDeezer() {
-                  window.location.assign("/api/auth/unlink/deezer");
-                }
 
+                function UnlinkDeezer() {
+                  const userId = localStorage.getItem("_id");
+                  const token = localStorage.getItem("token");
+
+                  fetch(`/api/auth/unlink/deezer/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                      'Authorization': token
+                    }
+                  })
+                    .then(res => {
+                      if (res.status == 200)
+                        return res.json();
+                      else
+                        alert("An error occured please try again!");
+                    })
+                    .then(data => {
+                      if (data.success == true) {
+                        localStorage.removeItem("deezerToken")
+                        localStorage.removeItem("_deezerId")
+                        localStorage.removeItem("token")
+                        localStorage.removeItem("_id")
+                        alert("You have unliked your account, you will now be redirected to Login ")
+                        window.location.assign("/")
+                      } else {
+                        alert("Unable to unlink account")
+                      }
+                    })
+                    .catch(error => {
+                      alert(`An error occured! ${error}`);
+                    });
+
+                }
 
                 const GetUserInformation = () => {
 
@@ -251,6 +281,7 @@
 
 
                 }
+
               </script>
 
             </div>

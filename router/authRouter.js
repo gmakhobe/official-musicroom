@@ -94,16 +94,7 @@ exports.router = (() => {
     authHandler.connect
   );
 
-  authRouter.get(
-    "/link/deezer/callback",
-    passport.authorize("deezer", {
-      session: false,
-    }),
-    authHandler.connect
-  );
-
-  authRouter.get("/unlink/deezer", authHandler.unlink)
- 
+  authRouter.get('/unlink/deezer/:userId',  authHandler.unlink)
 
   return authRouter;
 })();

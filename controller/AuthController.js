@@ -46,15 +46,20 @@ module.exports = {
       }
     );
   },
-
   unlink: (req, res) => {
-    var user = req.user;
-    req.user._deezerToken = null,
-      user.save(function (err) {
-        if (err)
-          throw err;
-        res.redirect('/profile');
-      }
-      )
+    User.find({ _id: req.params.userId }, (err, user) => {
+      User.findByIdAndUpdate({ _id:req.params.userId },
+        { deezerToken: "" , _deezerId: ""},
+        { new: true },
+        (err, user) => { 
+          if (err) return res.json({ success: false, error: err });
+          else if (user) return res.json({ success: true });
+          else return res.json({ success: false });
+        }
+      );
+    
+    });
   },
+  
 };
+
