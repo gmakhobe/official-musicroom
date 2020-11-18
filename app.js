@@ -19,8 +19,8 @@ const axios = require("axios");
 
 const port = 5000;
 
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocs = require("./docs/swagger.json");
+const swaggerUI = require('swagger-ui-express');
+const swaggerJsDocs = require('swagger-jsdoc');
 const User = require("./model/UserModel");
 // MongoDB Connection
 
@@ -63,9 +63,22 @@ app.use(express.static(path.join(__dirname, "public"))); // Fetch static content
 require("./services/passport-service")(passport); //pass same instance of passport to be used in config.
 app.use(passport.initialize());
 
+const swaggerOptions = {
+  swaggerDefinition: {
+    info: {
+      title: 'Music Room',
+      description: 'Music Room API Documentation',
+      servers: ["http://localhost:5000"],
+      version: '2.0'
+    },
+  },
+  apis: ['./router/playlistRouter.js', './router/searchRouter.js', './router/userRouter.js']
+}
+
+const swaggerDocs = swaggerJsDocs(swaggerOptions);
 // Use routers
 app.use(require("./router/Index"));
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
 app.use("/api/search", searchRouter.router);
