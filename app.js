@@ -21,6 +21,7 @@ const port = 5000;
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocs = require("./docs/swagger.json");
+const User = require("./model/UserModel");
 // MongoDB Connection
 
 //DB Connection
@@ -64,7 +65,7 @@ app.use(passport.initialize());
 
 // Use routers
 app.use(require("./router/Index"));
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs)); 
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
 app.use("/api/search", searchRouter.router);
@@ -76,9 +77,8 @@ io.of("/api/playlist").on("connection", (socket) => {
   socket.emit("welcome", "this was just a test");
 
   socket.on("get playlist", (userInfo) => {
-
     const parameters = {
-      userid: userInfo.userId
+      userid: userInfo.userId,
     };
 
     Playlist.find().then((lists) => {
@@ -102,39 +102,139 @@ io.of("/api/playlist").on("connection", (socket) => {
           }
         });
 
-        socket.emit(
-          "get all playlist", {
+        socket.emit("get all playlist", {
           success: true,
           message: "Public and Private playlist from db",
           playLists: PlaylistArray,
         });
-
       } else {
-        
-        socket.emit(
-          "get all playlist error", {
+        socket.emit("get all playlist error", {
           success: false,
-          message: "An error occured getting Public and Private playlist from db"
+          message:
+            "An error occured getting Public and Private playlist from db",
         });
-        
       }
     });
-
   });
 
-  socket.on("playlist data", (_deezerPId) => {
-	  /* is it in db */
+  socket.on("playlist data", ({ _deezerPId }) => {
+    /* is it in db */
 
-	  Playlist.findOne({ _deezerPId: _deezerPId }).then(async (playlistInfo) => {
+    Playlist.findOne({ _deezerPId: _deezerPId }).then((playlistInfo) => {
       const url = `https://api.deezer.com/playlist/${playlistInfo._deezerPId}`;
 
-      const deezerPlaylist = await axios.get(url);
-      socket.emit("playlist data success", [
-        ...playlistInfo,
-        ...deezerPlaylist,
-      ]);
+      axios
+        .get(url)
+        .then((deezerPlaylist) => {
+          socket.emit("playlist data success", {
+            success: true,
+            message: "Playlist info",
+            playlistDetails: [playlistInfo, deezerPlaylist.data],
+          });
+        })
+        .catch((err) => {
+          console.log("there was an err", err);
+        });
     });
-  })
+  });
+
+  //add track
+  socket.on("add track", (data) => {
+    const parameters = {
+      PId: data.PId,
+      trackId: data.trackId,
+      creatorId: data.creatorId,
+    };
+
+    Playlist.findOne({
+      _deezerPId: parameters["PId"],
+    }).then((response) => {
+      if (!response) {
+        return socket.emit("add track error", {
+          message: "No playlist with that id found",
+        });
+      }
+
+      //is the playlist public?
+      if (response.type == "public") {
+        //get creator token
+        User.findOne({ _id: parameters.creatorId }).then((playlistCreator) => {
+          const creatorToken = playlistCreator.deezerToken;
+
+          //add track to dezeer playlist
+          const url = `https://api.deezer.com/playlist/${parameters.PId}/tracks?request_method=post&songs=${parameters.trackId}&access_token=${creatorToken}`;
+
+          axios
+            .get(url)
+            .then((result) => {
+              if (result) {
+                socket.emit("add track success", {
+                  message: "track successfully added",
+                  trackId: parameters.trackId,
+                });
+              } else {
+                console.log("could not add track bozza!!!");
+                socket.emit("add track error", {
+                  message: "could not add track",
+                });
+              }
+            })
+            .catch((err) => {
+              if (err) {
+                socket.emit("add track error", {
+                  message: "Track already added",
+                });
+              }
+            });
+        });
+      } else {
+        let test = false;
+
+        response.users.forEach((user) => {
+          if (user.id == parameters["userid"] && user.role == "RW") {
+            test = true;
+          }
+        });
+
+        if (!test) {
+          return socket.emit("add track error", {
+            message: "You are not allowed to add track to this playlist",
+          });
+        }
+
+        User.findOne({ _id: parameters.creatorId }).then((playlistCreator) => {
+          const creatorToken = playlistCreator.deezerToken;
+
+          //add track to dezeer playlist
+          const url = `https://api.deezer.com/playlist/${parameters.PId}/tracks?request_method=post&songs=${parameters.trackId}&access_token=${creatorToken}`;
+
+          axios
+            .get(url)
+            .then((result) => {
+              if (result) {
+                socket.emit("add track success", {
+                  message: "track successfully added",
+                  trackId: parameters.trackId,
+                });
+              } else {
+                console.log("could not add track bozza!!!");
+                socket.emit("add track error", {
+                  message: "could not add track",
+                });
+              }
+            })
+            .catch((err) => {
+              if (err) {
+                socket.emit("add track error", {
+                  message: "Track already added",
+                });
+              }
+            });
+        });
+      }
+    });
+  });
+
   socket.on("create playlist", (playlistInfo) => {
     Playlist.findOne({ name: playlistInfo.title })
       .then((ExistingPlaylist) => {
@@ -168,7 +268,11 @@ io.of("/api/playlist").on("connection", (socket) => {
                   { _id: playlist._id },
                   {
                     $push: {
-                      users: { id: playlistInfo.userId, role: "RW", creator: true },
+                      users: {
+                        id: playlistInfo.userId,
+                        role: "RW",
+                        creator: true,
+                      },
                     },
                   },
                   { new: true },
