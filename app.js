@@ -171,7 +171,7 @@ io.of("/api/playlist").on("connection", (socket) => {
 			
             if (!doubleUser) {
               users.push({
-                id: user.id,
+                id: newUser._id,
                 role: parameters["role"],
                 creator: false,
               });
@@ -186,7 +186,7 @@ io.of("/api/playlist").on("connection", (socket) => {
 			//update user array
             Playlist.findOneAndUpdate(
               {
-                _id: params["PId"],
+                _deezerPId: parameters["PId"],
               },
               {
                 $set: {
@@ -210,6 +210,9 @@ io.of("/api/playlist").on("connection", (socket) => {
                 }
               })
               .catch((error) => {
+
+                console.log(error);
+
                 if (error) {
                   return socket.emit("add user error", {
                     success: false,
@@ -297,7 +300,8 @@ io.of("/api/playlist").on("connection", (socket) => {
   socket.on("add track", (data) => {
     const parameters = {
       PId: data.PId,
-      trackId: data.trackId,
+	  trackId: data.trackId,
+	  userId: data.userId,
       creatorId: data.creatorId,
     };
 
@@ -346,7 +350,7 @@ io.of("/api/playlist").on("connection", (socket) => {
         let test = false;
 
         playlist.users.forEach((user) => {
-          if (user.id == parameters["userid"] && user.role == "RW") {
+          if (user.id == parameters["userId"] && user.role == "RW") {
             test = true;
           }
         });

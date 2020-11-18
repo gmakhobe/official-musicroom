@@ -207,13 +207,15 @@
   document.getElementById("MusicList").style.display = "none";
 
   function SendSongInfo(pId, cId, tId, name) {
+    const userid = localStorage.getItem("_id");
 
     //alert(`${pId} - ${cId} - ${tId}`);
     alert(`Adding ${name} to playlist!`);
     socket.emit('add track', {
       PId: pId,
       trackId: tId,
-      creatorId: cId
+      creatorId: cId,
+      userId: userid
     });
     //Socket Implementation
   }

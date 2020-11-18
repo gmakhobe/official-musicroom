@@ -6,7 +6,7 @@ const userHandler = require("../controller/UserController");
 exports.router = (() => {
   const userRouter = express.Router();
   
-  userRouter.get("/", userHandler.getUsers);
+  userRouter.get("/all", userHandler.getUsers);
 
 
   userRouter.get("/:id", userHandler.getUserById);
