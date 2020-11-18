@@ -300,7 +300,8 @@ io.of("/api/playlist").on("connection", (socket) => {
   socket.on("add track", (data) => {
     const parameters = {
       PId: data.PId,
-      trackId: data.trackId,
+	  trackId: data.trackId,
+	  userId: data.userId,
       creatorId: data.creatorId,
     };
 
@@ -349,7 +350,7 @@ io.of("/api/playlist").on("connection", (socket) => {
         let test = false;
 
         playlist.users.forEach((user) => {
-          if (user.id == parameters["userid"] && user.role == "RW") {
+          if (user.id == parameters["userId"] && user.role == "RW") {
             test = true;
           }
         });
