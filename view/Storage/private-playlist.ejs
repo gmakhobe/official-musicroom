@@ -14,10 +14,6 @@
                     const socket = io('/api/playlist');
                 </script>
 
-                <!-- Start: Search
-        <%- include ('search.ejs') %>
-        End: Search -->
-
                 <div class="row">
                     <div class="col-12 grid-margin stretch-card">
                         <div class="card">
@@ -37,10 +33,10 @@
                     </div>
                 </div>
 
-                <%- include ('search.ejs') %>
-
                 <input id="creator-id" type="text" hidden/>
                 <input id="playlist-id" type="text" hidden/>
+
+                <%- include ('search.ejs') %>
 
                 <div class="row">
                     <div class="col-12 grid-margin">
@@ -48,35 +44,7 @@
                             <div class="card-body">
                                 <h4 class="card-title">Tracklist</h4>
                                 <div class="table-responsive">
-                                    <!--
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th> Track </th>
-                                                <th> Artist </th>
-                                                <th> Album </th>
-                                                <th> Duration</th>
-                                                <th> Actions(Play and Stop)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <img src="assets/images/faces/face4.jpg" class="mr-2" alt="image">
-                                                    John Doe
-                                                </td>
-                                                <td> Loosing control on server </td>
-                                                <td>
-                                                    <label class="badge badge-gradient-danger">REJECTED</label>
-                                                </td>
-                                                <td> Dec 3, 2017 </td>
-                                                <td> WD-12348 </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                    -->
-
+                                   
                                     <h3>Deezer Player</h3>
                                     <div id="deezer-widget-player" class="deezer-widget-player"
                                         data-src=""

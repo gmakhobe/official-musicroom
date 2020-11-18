@@ -9,8 +9,122 @@
         </select>
         <br>
         <button onclick="playlistSearch()" class="btn btn-gradient-dark">Search for tracks</button>
-        <button onclick="addUser()" class="btn btn-gradient-dark">Add users</button>
+        <button onclick="GetAllUsers()" data-toggle="modal" data-target="#AddUsersModal"
+          class="btn btn-gradient-dark">Add users</button>
       </div>
+
+      <style>
+        .list-group-item:hover {
+          background-color: black;
+          color: white;
+        }
+      </style>
+
+      <!-- Modal -->
+      <div class="modal fade" id="AddUsersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add Users To Playlist</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+        
+              <div class="list-group" id="AllUsers">
+                <a href="#" class="list-group-item">First item</a>
+                <a href="#" class="list-group-item">Second item</a>
+                <a href="#" class="list-group-item">Third item</a>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function GetAllUsers() {
+          const token = localStorage.getItem("token");
+
+          fetch(`/api/user/all`, {
+              method: 'GET',
+              headers: {
+                'Authorization': token
+              }
+            })
+            .then(res => {
+              if (res.status == 200)
+                return res.json();
+              else
+                alert("An error occured please try again!");
+            })
+            .then(data => {
+
+              const userDisplay = document.getElementById("AllUsers");
+              const CreatorId = document.getElementById("creator-id").value;
+              const PlaylistId = document.getElementById("playlist-id").value;
+              userDisplay.innerHTML = "";
+
+              if (data.success){
+                
+                data.users.map( (user) => {
+
+                  userDisplay.innerHTML += `
+                  <div id="${user._id}" class="list-group-item">
+                    <h3>${user.firstname} ${user.lastname}</h3>
+                    <p>${user.username} - ${user.created_at}</p>
+                    <p><strong>Add User to plalist with?</strong><br/>
+                    <button onclick="SendUserInfo('${user._id}', '${CreatorId}', '${PlaylistId}', 'R')" class="btn btn-warning">Non Edit Rights</button> or <button onclick="SendUserInfo('${user._id}', '${CreatorId}', '${PlaylistId}', 'RW')" class="btn btn-danger">Edit Rights</button>
+                    </p>
+                  </div>
+                  `;  
+
+                });
+
+                document.getElementById(CreatorId).style.display = "none";
+
+              }else{
+                alert("An error occured while get users");
+              }
+
+              console.log(data);
+
+            })
+            .catch(error => {
+              alert(`An error occured! ${error}`);
+            });
+            
+        }
+
+        function SendUserInfo(userid, creatorId, playlistId, rights){
+          //alert(`${userid} - ${creatorId} - ${playlistId} - ${rights}`);
+          if (creatorId == userid){
+            alert("Creator can not be added to a playlist!");
+            return ;
+          }
+
+          socket.emit('join room', {
+            PId: playlistId,
+            newUserId: userid,
+            creatorId: creatorId,
+            role: rights
+          });
+        }
+
+        socket.on("add user success", ({message, newUserId}) => {
+          alert(message);
+          document.getElementById(newUserId).style.display = "none";
+        });
+
+        socket.on("add user error", ({message}) => {
+          alert(message);
+        });
+      </script>
 
       <script>
         const playlistSearch = () => {
@@ -18,9 +132,9 @@
           const type = document.getElementById("playlistType").value;
           const token = localStorage.getItem("token");
 
-          if (!search || search.length < 2){
+          if (!search || search.length < 2) {
             alert("Search filed required");
-            return ;
+            return;
           }
 
           fetch(`/api/search?type=${type}&q=${search}`, {
@@ -44,12 +158,12 @@
               tList.innerHTML = "";
 
               //Get PlaylistId, CreatorId, TrackId
-              const PlaylistId = document.getElementById("playlist-id").value, 
-              CreatorId = document.getElementById("creator-id").value;
+              const PlaylistId = document.getElementById("playlist-id").value,
+                CreatorId = document.getElementById("creator-id").value;
 
               //console.log("Searched Tracks:", data)
 
-              tracks.map( (track) => {
+              tracks.map((track) => {
 
                 tList.innerHTML += `
                   <a id="${track.id}" href="javascript:SendSongInfo('${PlaylistId}', '${CreatorId}', '${track.id}', '${track.title}')" class="list-group-item">
@@ -59,15 +173,15 @@
                 `;
 
               });
-              
+
             })
             .catch(error => {
               alert(`An error occured! ${error}`);
             });
 
         }
+
       </script>
-      PlaylisId, SongId, CreatorId
 
     </div>
   </div>
@@ -78,13 +192,6 @@
     <div class="card-body">
 
       <h2 id="searchHeading">Search results: "*****"</h2>
-
-      <style>
-        .list-group-item:hover{
-          background-color: black;
-          color: white;
-        }
-      </style>
 
       <div class="list-group" id="TrackList">
         <a href="#" class="list-group-item">First item</a>
@@ -97,29 +204,34 @@
 </div>
 
 <script>
-
   document.getElementById("MusicList").style.display = "none";
 
-  function SendSongInfo(pId, cId, tId, name){
+  function SendSongInfo(pId, cId, tId, name) {
 
     //alert(`${pId} - ${cId} - ${tId}`);
     alert(`Adding ${name} to playlist!`);
     socket.emit('add track', {
-      PId: pId, trackId: tId, creatorId: cId
+      PId: pId,
+      trackId: tId,
+      creatorId: cId
     });
     //Socket Implementation
   }
 
-  socket.on('add track error', ({message}) => {
+  socket.on('add track error', ({
+    message
+  }) => {
     alert(message);
   });
 
-  socket.on('add track success', ({message, trackId}) => {
+  socket.on('add track success', ({
+    message,
+    trackId
+  }) => {
     alert(message);
     document.getElementById(trackId).style.display = "none";
 
     let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
     document.getElementById("deezer-widget-player").setAttribute("data-src", source);
   });
-
 </script>
