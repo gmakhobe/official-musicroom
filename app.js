@@ -82,8 +82,8 @@ io.of("/api/playlist").on("connection", (socket) => {
     const parameters = {
       PId: data.PId,
       newUserId: data.newUserId,
-	  creatorId: data.creatorId,
-	  role: data.role
+      creatorId: data.creatorId,
+      role: data.role,
     };
 
     Playlist.findOne({
@@ -91,10 +91,9 @@ io.of("/api/playlist").on("connection", (socket) => {
     })
       .then((playlist) => {
         if (!playlist) {
-          return ocket.emit("add user error", {
+          return socket.emit("add user error", {
             success: false,
-            message:
-              "An error occured getting Private playlist from db",
+            message: "An error occured getting Private playlist from db",
           });
         }
 
@@ -103,7 +102,8 @@ io.of("/api/playlist").on("connection", (socket) => {
           User.findOne({ _id: parameters["newUserId"] })
             .then((user) => {
               socket.join(parameters["PId"]);
-              return io.of("/api/playlist")
+              return io
+                .of("/api/playlist")
                 .in(parameters["PId"])
                 .emit("add user success", {
                   success: true,
@@ -121,9 +121,9 @@ io.of("/api/playlist").on("connection", (socket) => {
               }
             });
         } else {
-		  //the playlist is private
-		  
-		  //check if newUser exist
+          //the playlist is private
+
+          //check if newUser exist
           User.findOne({
             _id: parameters["newUserId"],
           }).then((newUser) => {
@@ -145,14 +145,14 @@ io.of("/api/playlist").on("connection", (socket) => {
             let index = -1;
 
             playlist.users.forEach((currentUser, key) => {
-				//check if creator
+              //check if creator
               if (
                 currentUser.id == parameters["creatorId"] &&
                 currentUser.role == "RW"
               ) {
                 test = true;
-			  }
-			  //check if new user is already in the playlist
+              }
+              //check if new user is already in the playlist
               if (newUser._id.toString() === currentUser.id) {
                 doubleUser = true;
                 index = key;
@@ -165,25 +165,26 @@ io.of("/api/playlist").on("connection", (socket) => {
               });
             }
 
-			//get all users from playlist
+            //get all users from playlist
             let users = playlist.users;
-			
-			
+
             if (!doubleUser) {
               users.push({
                 id: newUser._id,
+                firstname: newUser.firstname,
+                lastname: newUser.lastname,
                 role: parameters["role"],
                 creator: false,
               });
             } else {
-				//if user already in room, update his info
+              //if user already in room, update his info
               users[index] = {
                 id: user.id,
                 role: parameters["role"],
                 creator: false,
               };
             }
-			//update user array
+            //update user array
             Playlist.findOneAndUpdate(
               {
                 _deezerPId: parameters["PId"],
@@ -200,7 +201,8 @@ io.of("/api/playlist").on("connection", (socket) => {
               .then((list) => {
                 if (list) {
                   socket.join(parameters["PId"]);
-                  return io.of("/api/playlist")
+                  return io
+                    .of("/api/playlist")
                     .in(parameters["PId"])
                     .emit("add user success", {
                       success: true,
@@ -210,7 +212,6 @@ io.of("/api/playlist").on("connection", (socket) => {
                 }
               })
               .catch((error) => {
-
                 console.log(error);
 
                 if (error) {
@@ -245,10 +246,7 @@ io.of("/api/playlist").on("connection", (socket) => {
 
         lists.forEach((list) => {
           list.users.forEach((newUser) => {
-            if (
-              newUser.id == parameters.userid &&
-              list.type == "private"
-            ) {
+            if (newUser.id == parameters.userid && list.type == "private") {
               PlaylistArray.push(list);
             }
           });
@@ -300,8 +298,8 @@ io.of("/api/playlist").on("connection", (socket) => {
   socket.on("add track", (data) => {
     const parameters = {
       PId: data.PId,
-	  trackId: data.trackId,
-	  userId: data.userId,
+      trackId: data.trackId,
+      userId: data.userId,
       creatorId: data.creatorId,
     };
 
@@ -423,32 +421,39 @@ io.of("/api/playlist").on("connection", (socket) => {
                     "there was a problem saving the playlist in the db"
                   );
                 }
-                Playlist.findByIdAndUpdate(
-                  { _id: playlist._id },
-                  {
-                    $push: {
-                      users: {
-                        id: playlistInfo.userId,
-                        role: "RW",
-                        creator: true,
-                      },
-                    },
-                  },
-                  { new: true },
-                  (err, newPlaylist) => {
-                    if (err) {
-                      socket.emit(
-                        "server error",
-                        "there was a problem saving the playlist in the db"
-                      );
-                    }
 
-                    socket.emit("create playlist success", {
-                      message: "playlist successfully created",
-                      playlist: newPlaylist,
-                    });
-                  }
-                );
+                User.findOne({ _id: playlistInfo.userId })
+                  .then((user) => {
+                    Playlist.findByIdAndUpdate(
+                      { _id: playlist._id },
+                      {
+                        $push: {
+                          users: {
+                            id: user._id,
+                            firstname: user.firstname,
+                            lastname: user.lastname,
+                            role: "RW",
+                            creator: true,
+                          }
+                        },
+                      },
+                      { new: true },
+                      (err, newPlaylist) => {
+                        if (err) {
+                          socket.emit(
+                            "server error",
+                            "there was a problem saving the playlist in the db"
+                          );
+                        }
+
+                        socket.emit("create playlist success", {
+                          message: "playlist successfully created",
+                          playlist: newPlaylist,
+                        });
+                      }
+                    );
+                  })
+                  .catch((err) => {});
               });
             })
             .catch((err) => {
