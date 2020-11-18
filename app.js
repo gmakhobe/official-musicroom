@@ -76,6 +76,161 @@ app.use("/api/explore", playlistRouter.router);
 io.of("/api/playlist").on("connection", (socket) => {
   socket.emit("welcome", "this was just a test");
 
+  socket.on("join room", (data) => {
+    /* check playlist in db */
+
+    const parameters = {
+      PId: data.PId,
+      newUserId: data.newUserId,
+	  creatorId: data.creatorId,
+	  role: data.role
+    };
+
+    Playlist.findOne({
+      _deezerPId: parameters["PId"],
+    })
+      .then((playlist) => {
+        if (!playlist) {
+          return ocket.emit("add user error", {
+            success: false,
+            message:
+              "An error occured getting Private playlist from db",
+          });
+        }
+
+        //is the playlist public?
+        if (playlist.type == "public") {
+          User.findOne({ _id: parameters["newUserId"] })
+            .then((user) => {
+              socket.join(parameters["PId"]);
+              return io.of("/api/playlist")
+                .in(parameters["PId"])
+                .emit("add user success", {
+                  success: true,
+                  message: `${user.username} has joined the room`,
+                  newUserId: parameters.newUserId,
+                });
+            })
+            .catch((err) => {
+              if (err) {
+                return socket.emit("add user error", {
+                  success: false,
+                  message:
+                    "An error occured getting Public and Private playlist from db",
+                });
+              }
+            });
+        } else {
+		  //the playlist is private
+		  
+		  //check if newUser exist
+          User.findOne({
+            _id: parameters["newUserId"],
+          }).then((newUser) => {
+            if (!newUser) {
+              socket.emit("add user error", {
+                success: false,
+                message: "User you are trying to add does not exist",
+              });
+            }
+            if (newUser._id.toString() == parameters["creatorId"]) {
+              socket.emit("add user error", {
+                success: false,
+                message: "Cannot add playlist creator to their own playlist",
+              });
+            }
+
+            let test = false;
+            let doubleUser = false;
+            let index = -1;
+
+            playlist.users.forEach((currentUser, key) => {
+				//check if creator
+              if (
+                currentUser.id == parameters["creatorId"] &&
+                currentUser.role == "RW"
+              ) {
+                test = true;
+			  }
+			  //check if new user is already in the playlist
+              if (newUser._id.toString() === currentUser.id) {
+                doubleUser = true;
+                index = key;
+              }
+            });
+            if (!test) {
+              socket.emit("add user error", {
+                success: false,
+                message: "User not permitted to access playlist",
+              });
+            }
+
+			//get all users from playlist
+            let users = playlist.users;
+			
+			
+            if (!doubleUser) {
+              users.push({
+                id: user.id,
+                role: parameters["role"],
+                creator: false,
+              });
+            } else {
+				//if user already in room, update his info
+              users[index] = {
+                id: user.id,
+                role: parameters["role"],
+                creator: false,
+              };
+            }
+			//update user array
+            Playlist.findOneAndUpdate(
+              {
+                _id: params["PId"],
+              },
+              {
+                $set: {
+                  users,
+                },
+              },
+              {
+                new: true,
+              }
+            )
+              .then((list) => {
+                if (list) {
+                  socket.join(parameters["PId"]);
+                  return io.of("/api/playlist")
+                    .in(parameters["PId"])
+                    .emit("add user success", {
+                      success: true,
+                      message: `A new user has joined the room`,
+                      newUserId: parameters.newUserId,
+                    });
+                }
+              })
+              .catch((error) => {
+                if (error) {
+                  return socket.emit("add user error", {
+                    success: false,
+                    message: "Server related error",
+                  });
+                }
+              });
+          });
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          return socket.emit("add user error", {
+            success: false,
+            message: "Server related error",
+          });
+        }
+      });
+  });
+
+  //get local + deezer playlist info
   socket.on("get playlist", (userInfo) => {
     const parameters = {
       userid: userInfo.userId,
@@ -86,9 +241,9 @@ io.of("/api/playlist").on("connection", (socket) => {
         const PlaylistArray = [];
 
         lists.forEach((list) => {
-          list.users.forEach((userResponse) => {
+          list.users.forEach((newUser) => {
             if (
-              userResponse.id == parameters.userid &&
+              newUser.id == parameters.userid &&
               list.type == "private"
             ) {
               PlaylistArray.push(list);
@@ -148,15 +303,15 @@ io.of("/api/playlist").on("connection", (socket) => {
 
     Playlist.findOne({
       _deezerPId: parameters["PId"],
-    }).then((response) => {
-      if (!response) {
+    }).then((playlist) => {
+      if (!playlist) {
         return socket.emit("add track error", {
           message: "No playlist with that id found",
         });
       }
 
       //is the playlist public?
-      if (response.type == "public") {
+      if (playlist.type == "public") {
         //get creator token
         User.findOne({ _id: parameters.creatorId }).then((playlistCreator) => {
           const creatorToken = playlistCreator.deezerToken;
@@ -190,7 +345,7 @@ io.of("/api/playlist").on("connection", (socket) => {
       } else {
         let test = false;
 
-        response.users.forEach((user) => {
+        playlist.users.forEach((user) => {
           if (user.id == parameters["userid"] && user.role == "RW") {
             test = true;
           }
