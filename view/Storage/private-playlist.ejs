@@ -56,6 +56,21 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3>Available Users</h3>
+                                <div class="list-group" id="AvailableUsers">
+                                    <a href="#" class="list-group-item">First item</a>
+                                    <a href="#" class="list-group-item">Second item</a>
+                                    <a href="#" class="list-group-item">Third item</a>
+                                  </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
                     //Returns playlis id from url
                     function returnPlaylistId() {
@@ -75,20 +90,36 @@
                     socket.on('playlist data success', (data) => {
                         const infoDeezer = data.playlistDetails[1];
                         const infoLocal = data.playlistDetails[0];
+                        const AvailableUsersDes = document.getElementById("AvailableUsers");
 
                         document.getElementById("PlalistName").innerHTML = infoLocal.name;
                         document.getElementById("PlalistDate").innerHTML = infoLocal.created_at;
                         document.getElementById("PlalistPicture").src = infoDeezer.picture;
                         document.getElementById("deezer-widget-player").setAttribute("data-src", `https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=true&width=700&height=350&color=EF5466&layout=&size=medium&type=playlist&id=${infoDeezer.id}&app_id=1`);
 
-                        console.log(document.getElementById("deezer-widget-player"));
+                        console.log("New Data", data);
 
-                        console.log("Local", infoLocal);
-                        console.log("Deezer", infoDeezer);
+                        //console.log(document.getElementById("deezer-widget-player"));
+
+                        //console.log("Local", infoLocal);
+                        //console.log("Deezer", infoDeezer);
+                        AvailableUsersDes.innerHTML = "";
                         infoLocal.users.map( user => {
                             if (user.creator){
                                 document.getElementById("creator-id").value = user.id;
+                            }else{
+                                AvailableUsersDes.innerHTML += `
+
+                                <div id="AU${user._id}" class="list-group-item">
+                                    <h3>${user.firstname} ${user.lastname}</h3>
+                                    <p><strong>Change role to?</strong><br/>
+                                    <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'R')" class="btn btn-warning">Non Edit Rights</button> or <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'RW')" class="btn btn-danger">Edit Rights</button> or <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'Remove')" class="btn btn-danger">Remove User</button>
+                                    </p>
+                                </div>
+
+                                `;
                             }
+
                         });
 
                         document.getElementById("playlist-id").value = infoDeezer.id;
@@ -111,6 +142,33 @@
 
                     });
 
+                    function AvailableUsersControl(userId, creator, playlistId, role){
+                        //alert(`${userId}, ${creator}, ${playlistId}, ${role}`);
+                        if (role != "Remove"){
+                            socket.emit('join room', {
+                              PId: playlistId,
+                              newUserId: userId,
+                              creatorId: creator,
+                              role: role
+                            });
+                        }else if (role == "Remove"){
+                            //alert("In theory a user should be deleted");
+                            socket.emit("remove user", {
+                                PId: playlistId,
+                                creatorId: creator,
+                                userId: userId
+                            });
+                        }
+                    }
+
+                    socket.on('remove user success', ({deletedUserId}) => {
+                        document.getElementById(deletedUserId).style.display = "none";
+                        alert("User removed");
+                    });
+
+                    socket.on('remove user error', ({deletedUserId}) => {
+                        alert("An error occured while removing the user, please try again!");
+                    });
 
                     //console.log("Playlis Id;", returnPlaylistId());
                 </script>
