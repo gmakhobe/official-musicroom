@@ -19,8 +19,8 @@ const axios = require("axios");
 
 const port = 5000;
 
-const swaggerUI = require('swagger-ui-express');
-const swaggerJsDocs = require('swagger-jsdoc');
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDocs = require("swagger-jsdoc");
 const User = require("./model/UserModel");
 // MongoDB Connection
 
@@ -66,14 +66,18 @@ app.use(passport.initialize());
 const swaggerOptions = {
   swaggerDefinition: {
     info: {
-      title: 'Music Room',
-      description: 'Music Room API Documentation',
+      title: "Music Room",
+      description: "Music Room API Documentation",
       servers: ["http://localhost:5000"],
-      version: '2.0'
+      version: "2.0",
     },
   },
-  apis: ['./router/playlistRouter.js', './router/searchRouter.js', './router/userRouter.js']
-}
+  apis: [
+    "./router/playlistRouter.js",
+    "./router/searchRouter.js",
+    "./router/userRouter.js",
+  ],
+};
 
 const swaggerDocs = swaggerJsDocs(swaggerOptions);
 // Use routers
@@ -87,7 +91,89 @@ app.use("/api/explore", playlistRouter.router);
 // End Use routers
 
 io.of("/api/playlist").on("connection", (socket) => {
-  socket.emit("welcome", "this was just a test");
+  socket.emit("welcome", "Welcome to Music Room");
+
+  socket.om("remove user", (data) => {
+    const parameters = {
+      PId: data.PId,
+      user: data.userId,
+      creatorId: data.creatorId,
+    };
+
+    Playlist.findOne({
+      _id: parameters["PId"],
+    }).then((response) => {
+      if (!response) {
+        return socket.emit("remove user error", {
+          success: false,
+          message: "An error occured getting Private playlist from db",
+        });
+      }
+
+      let test = false;
+      /* check if creator */
+      response.users.forEach((currentUser, key) => {
+        //check if creator
+        if (
+          currentUser.id == parameters["creatorId"] &&
+          currentUser.role == "RW"
+        ) {
+          test = true;
+        }
+      });
+      if (!test) {
+        return socket.emit("remove user error", {
+          success: false,
+          message: "User not permitted to perform action",
+        });
+      }
+
+      let index = -1;
+
+      /* find the index of user to be deleted in users array */
+      response.users.forEach((user, key) => {
+        if (parameters["user"] == user.id) {
+          index = key;
+        }
+      });
+
+      const deletedUser = response.users.splice(index, 1);
+
+      Playlist.findOneAndUpdate(
+        {
+          _id: parameters["PId"],
+        },
+        {
+          $set: {
+            users: response.users,
+          },
+        },
+        {
+          new: true,
+        }
+      )
+        .then((list) => {
+          if (list) {
+            return io
+              .of("/api/playlist")
+              .in(parameters["PId"])
+              .emit("remove user success", {
+                success: true,
+                message: `${deletedUser.firstname} ${deletedUser.lastname} been removed from the room`,
+                deletedUserId: deletedUser.id,
+              });
+          }
+        })
+        .catch((error) => {
+          if (error) {
+            return socket.emit("remove user error", {
+              success: false,
+              message: "Server related error",
+            });
+          }
+        });
+    });
+  });
 
   socket.on("join room", (data) => {
     /* check playlist in db */
@@ -166,13 +252,13 @@ io.of("/api/playlist").on("connection", (socket) => {
                 test = true;
               }
               //check if new user is already in the playlist
-              if (newUser._id.toString() === currentUser.id) {
+              if (newUser._id.toString() == currentUser.id) {
                 doubleUser = true;
                 index = key;
               }
             });
             if (!test) {
-              socket.emit("add user error", {
+              return socket.emit("add user error", {
                 success: false,
                 message: "User not permitted to access playlist",
               });
@@ -192,7 +278,9 @@ io.of("/api/playlist").on("connection", (socket) => {
             } else {
               //if user already in room, update his info
               users[index] = {
-                id: user.id,
+                id: newUser._id,
+                firstname: newUser.firstname,
+                lastname: newUser.lastname,
                 role: parameters["role"],
                 creator: false,
               };
@@ -447,7 +535,7 @@ io.of("/api/playlist").on("connection", (socket) => {
                             lastname: user.lastname,
                             role: "RW",
                             creator: true,
-                          }
+                          },
                         },
                       },
                       { new: true },
