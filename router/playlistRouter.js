@@ -13,6 +13,8 @@ exports.router = (() => {
  *      tags:
  *        - Playlists
  *      description: Gets all private and public playlists
+ *      security:
+ *        - bearerAuth:[]
  *      responses:
  *          200:
  *              description: Returns an object of playlists
@@ -27,6 +29,8 @@ exports.router = (() => {
  *      tags:
  *        - Playlists
  *      description: Modifies the playlist by adding users on to private playlist
+ *      security:
+ *        - bearerAuth:[]
  *      responses:
  *          200:
  *              description: Playlist Modified successfully
@@ -41,6 +45,8 @@ exports.router = (() => {
  *      tags:
  *        - Playlists
  *      description: Creates a new playlist
+ *      security:
+ *        - bearerAuth:[]
  *      parameters:
  *          - in: query
  *            name: title
