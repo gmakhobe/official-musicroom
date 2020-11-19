@@ -94,6 +94,25 @@ app.use("/api/explore", playlistRouter.router);
 io.of("/api/playlist").on("connection", (socket) => {
   socket.emit("welcome", "Welcome to Music Room");
 
+  socket.on("broadcast track", (data) => {
+	const trackId = data.trackId
+	const PId = data.PId
+
+	io.of("/api/playlist")
+    .in(PId)
+    .emit("broadcast track", {
+      success: true,
+      message: `Someone has emitted a track in the room`,
+      trackId: trackId,
+	});
+	socket.emit("broadcast track success", {
+    success: true,
+    message: `You have successfully emitted a track in the room`,
+    trackId: trackId,
+  });
+
+  })
+
   socket.on("remove user", (data) => {
     const parameters = {
       PId: data.PId,
