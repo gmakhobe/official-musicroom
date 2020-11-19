@@ -52,7 +52,7 @@
 <div id="dz-root"></div>
 <div id="player" style="width:100%;" align="center"></div>
 <br />
-<div id="controlers">
+<div id="controlers" style="display: none;">
 
     <br />
     <h3>Music Controls</h3>
@@ -73,7 +73,7 @@
 
     <br /><br /><br />
 </div>
-<div id="slider_seek" class="progressbarplay" style="">
+<div id="slider_seek" class="progressbarplay">
     <div class="bar" style="width: 0%;"></div>
 </div>
 <script>
@@ -100,14 +100,13 @@
         DZ.Event.subscribe('current_track', function (arg) {
             event_listener_append('current_track', arg.index, arg.track.title, arg.track.album.title);
             //console.log("Track Information", arg);
-            alert("Socket should emit");
 
-            const pId = document.getElementById("playlist-id").value;
+            /*const pId = document.getElementById("playlist-id").value;
 
             socket.emit("broadcast track", {
                 trackId: arg.track.id,
                 pId: pId
-            });
+            });*/
         });
         DZ.Event.subscribe('player_position', function (arg) {
             event_listener_append('position', arg[0], arg[1]);
@@ -148,5 +147,7 @@
         alert("Success message");
     });
 </script><br />
-event_listener : <br />
-<pre id="event_listener" style="height:100px;overflow:auto;"></pre>
+<div style="display: none;">
+    event_listener : <br />
+    <pre  style="display: none !important; opacity: 0;" id="event_listener" style="height:100px;overflow:auto;"></pre>
+</div>
