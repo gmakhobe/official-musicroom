@@ -76,6 +76,7 @@ const swaggerOptions = {
     "./router/playlistRouter.js",
     "./router/searchRouter.js",
     "./router/userRouter.js",
+    "./router/authRouter.js"
   ],
 };
 

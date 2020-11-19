@@ -6,16 +6,19 @@ const passport = require("passport");
 exports.router = (() => {
   const authRouter = express.Router();
 
-  /**
-   * @api {GET} /api/auth Check user auth status
-   * @apiName isAuthenticated
-   * @apiGroup Authentication
-   *
-   * @apiDescription Checks if current user is authenticated
-   *
-   * @apiSuccess {Boolean} auth authenticated status.
-   * @apiSuccess {Object} user user object from bd.
-   */
+/**
+ * @swagger
+ * /api/auth:
+ *  get:
+ *      tags:
+ *        - Authentication
+ *      description: Checks if the user is Authenticated
+ *      responses:
+ *          200:
+ *              description: Sends back authenticated user object
+ *          401:
+ *              description: Requires Authentication
+ */
 
   authRouter.get(
     "/",
