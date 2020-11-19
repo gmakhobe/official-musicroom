@@ -154,11 +154,7 @@ io.of("/api/playlist").on("connection", (socket) => {
       )
         .then((list) => {
 
-          console.log("Hello 1");
-
           if (list) {
-
-            console.log("Hello 2");
 
             return socket.emit("remove user success", {
                 success: true,
@@ -167,7 +163,6 @@ io.of("/api/playlist").on("connection", (socket) => {
               });
           }
 
-          console.log("Hello 3");
         })
         .catch((error) => {
           if (error) {
