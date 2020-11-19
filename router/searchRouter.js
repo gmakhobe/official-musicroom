@@ -17,17 +17,18 @@ exports.router = (() => {
  *            name: type
  *            schema:
  *              type: string
- *            description: Search by providing the name of the artist or name of the song
+ *            description: Provide the type of what you are searching for. Hint >> type >> (track)
  *          - in: query
  *            name: q
  *            schema:
  *              type: string
- *            description: Provide the search type, which is Track
+ *            description: The name of the song or artist
  *      responses:
  *          200:
  *              description: Display all tracks by name/artist name
- *          401:
- *              description: Requires Authentication
+ *          400:
+ *              description: Bad Request
+ *        
  */
     
     searchRouter.get("/", searchHandler.search);
