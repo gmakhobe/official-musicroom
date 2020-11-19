@@ -15,7 +15,18 @@ module.exports = {
     User.find({ _id: req.user._id }, (err, user) => {
       if (err) {
         res.json({ success: false });
+
+        res.status(400).json({
+          success: false,
+          message: `There was an error trying to get user`,
+          error: err,
+        });
       } else {
+		   res.status(200).json({
+         success: true,
+         message: `Get user by id successful`,
+         user: user,
+       });
         res.json({ success: true, user: user });
       }
     });
@@ -35,7 +46,6 @@ module.exports = {
     if (req.body.email) updateQuery.email = req.body.email;
 
     User.find({ _id: req.body.id }, (err, user) => {
-      
       console.log("Info received from DB", user);
 
       if (err) {
@@ -66,6 +76,5 @@ module.exports = {
         res.json({ success: true, user: user });
       }
     });
-  }
-
+  },
 };
