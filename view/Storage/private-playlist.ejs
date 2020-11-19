@@ -161,13 +161,13 @@
                         }
                     }
 
-                    socket.on('remove user success', ({deletedUserId}) => {
-                        document.getElementById(deletedUserId).style.display = "none";
-                        alert("User removed");
+                    socket.on('remove user success', ({deletedUserId, message}) => {
+                        document.getElementById("AU" + deletedUserId).style.display = "none";
+                        alert(message);
                     });
 
-                    socket.on('remove user error', ({deletedUserId}) => {
-                        alert("An error occured while removing the user, please try again!");
+                    socket.on('remove user error', ({message}) => {
+                        alert(message);
                     });
 
                     //console.log("Playlis Id;", returnPlaylistId());
