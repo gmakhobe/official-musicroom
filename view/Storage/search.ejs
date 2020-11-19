@@ -1,4 +1,4 @@
-<div class="col-12 grid-margin stretch-card">
+<div id="searchDev" class="col-12 grid-margin stretch-card">
   <div class="card">
     <div class="card-body">
 
@@ -9,7 +9,7 @@
         </select>
         <br>
         <button onclick="playlistSearch()" class="btn btn-gradient-dark">Search for tracks</button>
-        <button onclick="GetAllUsers()" data-toggle="modal" data-target="#AddUsersModal"
+        <button id="AddUserBTN" onclick="GetAllUsers()" data-toggle="modal" data-target="#AddUsersModal"
           class="btn btn-gradient-dark">Add users</button>
       </div>
 
@@ -108,7 +108,7 @@
             return ;
           }
 
-          socket.emit('join room', {
+          socket.emit('add user', {
             PId: playlistId,
             newUserId: userid,
             creatorId: creatorId,

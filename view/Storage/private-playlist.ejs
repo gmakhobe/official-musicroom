@@ -1,4 +1,3 @@
-
 <!-- partial:header -->
 <%- include ('admin/admin-header.ejs') %>
 <div class="container-scroller">
@@ -92,37 +91,55 @@
                         document.getElementById("PlalistName").innerHTML = infoLocal.name;
                         document.getElementById("PlalistDate").innerHTML = infoLocal.created_at;
                         document.getElementById("PlalistPicture").src = infoDeezer.picture;
-                        /*document.getElementById("deezer-widget-player").setAttribute("data-src",
-                            `https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=true&width=700&height=350&color=EF5466&layout=&size=medium&type=playlist&id=${infoDeezer.id}&app_id=1`
-                        );*/
 
-                        console.log("New Data", data);
+                        //console.log("New Data", data);
+                        const usersArrLength = infoLocal.users.length;
+                        let isUserPart = false;
+                        
+                        for (let index = 0; index < usersArrLength; index++){
+                            //alert(String(userId));
+                            if (String(infoLocal.users[index].id) == String(userId)){
+                                isUserPart = true;
+                            }
+                        }
 
-                        //console.log(document.getElementById("deezer-widget-player"));
+                        if (!isUserPart){
+                            window.location.assign("/explore");
+                        }
 
-                        //console.log("Local", infoLocal);
-                        //console.log("Deezer", infoDeezer);
                         AvailableUsersDes.innerHTML = "";
                         infoLocal.users.map(user => {
+
                             if (user.creator) {
                                 document.getElementById("creator-id").value = user.id;
                             } else {
+
+                                if (userId == user.id && user.role == "R"){
+                                    //alert(`${user.id} - ${userId} - ${user.role}`)
+                                    document.getElementById("searchDev").style.display = "none";
+                                }
+
                                 AvailableUsersDes.innerHTML += `
 
                                 <div id="AU${user._id}" class="list-group-item">
                                     <h3>${user.firstname} ${user.lastname}</h3>
+                                    <center>
+                                        <p>Current Role: ` + (user.role == "R" ? "Non Edit Rights" : "Edit Rights") +` </p>
+                                    </center>
+                                    <div class="AccessController">
                                     <p><strong>Change role to?</strong><br/>
                                     <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'R')" class="btn btn-warning">Non Edit Rights</button> or <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'RW')" class="btn btn-danger">Edit Rights</button> or <button onclick="AvailableUsersControl('${user.id}', '${infoLocal.users[0].id}', '${PlaylistId}', 'Remove')" class="btn btn-danger">Remove User</button>
                                     </p>
+                                    <div>
                                 </div>
 
                                 `;
+
                             }
 
                         });
 
                         document.getElementById("playlist-id").value = infoDeezer.id;
-                        //DZ.player.playPlaylist(infoDeezer.id);
 
                         var w = document[typeof document.getElementsByClassName === 'function' ?
                             'getElementsByClassName' : 'querySelectorAll']('deezer-widget-player');
@@ -139,25 +156,27 @@
                             w[i].appendChild(el);
                         }
 
-
                     });
 
                     function AvailableUsersControl(userId, creator, playlistId, role) {
-                        //alert(`${userId}, ${creator}, ${playlistId}, ${role}`);
+
                         if (role != "Remove") {
-                            socket.emit('join room', {
+
+                            socket.emit('add user', {
                                 PId: playlistId,
                                 newUserId: userId,
                                 creatorId: creator,
                                 role: role
                             });
+
                         } else if (role == "Remove") {
-                            //alert("In theory a user should be deleted");
+
                             socket.emit("remove user", {
                                 PId: playlistId,
                                 creatorId: creator,
                                 userId: userId
                             });
+
                         }
                     }
 
@@ -175,24 +194,27 @@
                         alert(message);
                     });
 
-                    //console.log("Playlis Id;", returnPlaylistId());
                 </script>
 
                 <script>
+                    setTimeout(function () {
+                        const tags = document.getElementsByClassName("AccessController");
+                        const tagsLength = tags.length;
+                        const creatorId = document.getElementById("creator-id").value;
+                        const userId = localStorage.getItem("_id");
 
-                    /*setTimeout()
+                        if (creatorId.toString() != userId.toString()) {
 
-                    function autoLoadPlaylist(){
-                        const pId = document.getElementById("playlist-id").value;
-                        
-                        alert("Adding player id", pId);
-                        
-                        
-                        return false;
-                    }
+                            for (let index = 0; index < tagsLength; index++) {
+                                tags[index].innerHTML = "";
 
-                    //autoLoadPlaylist();*/
+                            }
 
+                            document.getElementById("AddUserBTN").style.display = "none";
+
+                        }
+
+                    }, 4000)
                 </script>
 
 
