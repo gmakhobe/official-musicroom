@@ -195,7 +195,14 @@ io.of("/api/playlist").on("connection", (socket) => {
     });
   });
 
+
+
   socket.on("join room", (data) => {
+    //add joinung func here,
+    //https://www.youtube.com/watch?v=jD7FnbI76Hg&t=2266s
+  })
+
+  socket.on("add user", (data) => {
     /* check playlist in db */
 
     const parameters = {
