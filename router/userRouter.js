@@ -14,9 +14,13 @@ exports.router = (() => {
  *          tags:
  *            - Users
  *          description: Gets all users in the database
+ *          security:
+ *            - bearerAuth: []
  *          responses:
  *              200:
- *                  description: display all the users in the database
+ *                  description: Display all the users in the database
+ *              401:
+ *                  description: Unauthorised Access
  */
 
   userRouter.get("/all", passport.authenticate("jwt", { session: false }),userHandler.getUsers);
@@ -28,6 +32,8 @@ exports.router = (() => {
  *      tags:
  *        - Users
  *      description: gets user by id
+ *      security:
+ *        - bearerAuth:[]
  *      parameters:
  *        - in: path
  *          name: id
@@ -50,11 +56,34 @@ exports.router = (() => {
  *      tags:
  *        - Users
  *      description: Updates user details
+ *      parameters:
+ *        - in: body
+ *          name: firstname
+ *          schema:
+ *            type: string
+ *          description: Updates the firstname
+ *        - in: body
+ *          name: lastname
+ *          schema:
+ *            type: string
+ *          description: Updates the lastname
+ *        - in: body
+ *          name: username
+ *          schema:
+ *            type: string
+ *          description: Updates the username
+ *        - in: body
+ *          name: email
+ *          schema:
+ *            type: string
+ *          description: Updates the email address
+ *      security:
+ *        - bearerAuth:[]
  *      responses:
  *          200:
  *              description: Returns a response success
  *          401:
- *              description: Requires Ruthentication
+ *              description: Requires Authentication
  */
   
   userRouter.put(

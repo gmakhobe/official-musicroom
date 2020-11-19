@@ -13,6 +13,11 @@ exports.router = (() => {
  *      tags:
  *        - Authentication
  *      description: Checks if the user is Authenticated
+ *      security:
+ *        JWT:
+ *            type: apiKey
+ *            name: Authorization
+ *            in: header
  *      responses:
  *          200:
  *              description: Sends back authenticated user object
