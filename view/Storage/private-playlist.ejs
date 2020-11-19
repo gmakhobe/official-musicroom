@@ -1,3 +1,4 @@
+
 <!-- partial:header -->
 <%- include ('admin/admin-header.ejs') %>
 <div class="container-scroller">
@@ -33,8 +34,8 @@
                     </div>
                 </div>
 
-                <input id="creator-id" type="text" hidden/>
-                <input id="playlist-id" type="text" hidden/>
+                <input id="creator-id" type="text" hidden />
+                <input id="playlist-id" type="text" hidden />
 
                 <%- include ('search.ejs') %>
 
@@ -42,15 +43,11 @@
                     <div class="col-12 grid-margin">
                         <div class="card">
                             <div class="card-body">
-                                <h4 class="card-title">Tracklist</h4>
-                                <div class="table-responsive">
-                                   
-                                    <h3>Deezer Player</h3>
-                                    <div id="deezer-widget-player" class="deezer-widget-player"
-                                        data-src=""
-                                        data-scrolling="no" data-frameborder="0" data-allowTransparency="true"
-                                        data-width="100%" data-height="350"></div>
-                                </div>
+
+
+                                <h3 class="card-title">Deezer Player</h3>
+                                <%- include ('deezer-assets.ejs') %>
+
                             </div>
                         </div>
                     </div>
@@ -65,7 +62,7 @@
                                     <a href="#" class="list-group-item">First item</a>
                                     <a href="#" class="list-group-item">Second item</a>
                                     <a href="#" class="list-group-item">Third item</a>
-                                  </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -95,7 +92,9 @@
                         document.getElementById("PlalistName").innerHTML = infoLocal.name;
                         document.getElementById("PlalistDate").innerHTML = infoLocal.created_at;
                         document.getElementById("PlalistPicture").src = infoDeezer.picture;
-                        document.getElementById("deezer-widget-player").setAttribute("data-src", `https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=true&width=700&height=350&color=EF5466&layout=&size=medium&type=playlist&id=${infoDeezer.id}&app_id=1`);
+                        /*document.getElementById("deezer-widget-player").setAttribute("data-src",
+                            `https://www.deezer.com/plugins/player?format=classic&autoplay=false&playlist=true&width=700&height=350&color=EF5466&layout=&size=medium&type=playlist&id=${infoDeezer.id}&app_id=1`
+                        );*/
 
                         console.log("New Data", data);
 
@@ -104,10 +103,10 @@
                         //console.log("Local", infoLocal);
                         //console.log("Deezer", infoDeezer);
                         AvailableUsersDes.innerHTML = "";
-                        infoLocal.users.map( user => {
-                            if (user.creator){
+                        infoLocal.users.map(user => {
+                            if (user.creator) {
                                 document.getElementById("creator-id").value = user.id;
-                            }else{
+                            } else {
                                 AvailableUsersDes.innerHTML += `
 
                                 <div id="AU${user._id}" class="list-group-item">
@@ -123,6 +122,7 @@
                         });
 
                         document.getElementById("playlist-id").value = infoDeezer.id;
+                        //DZ.player.playPlaylist(infoDeezer.id);
 
                         var w = document[typeof document.getElementsByClassName === 'function' ?
                             'getElementsByClassName' : 'querySelectorAll']('deezer-widget-player');
@@ -142,16 +142,16 @@
 
                     });
 
-                    function AvailableUsersControl(userId, creator, playlistId, role){
+                    function AvailableUsersControl(userId, creator, playlistId, role) {
                         //alert(`${userId}, ${creator}, ${playlistId}, ${role}`);
-                        if (role != "Remove"){
+                        if (role != "Remove") {
                             socket.emit('join room', {
-                              PId: playlistId,
-                              newUserId: userId,
-                              creatorId: creator,
-                              role: role
+                                PId: playlistId,
+                                newUserId: userId,
+                                creatorId: creator,
+                                role: role
                             });
-                        }else if (role == "Remove"){
+                        } else if (role == "Remove") {
                             //alert("In theory a user should be deleted");
                             socket.emit("remove user", {
                                 PId: playlistId,
@@ -161,16 +161,38 @@
                         }
                     }
 
-                    socket.on('remove user success', ({deletedUserId, message}) => {
+                    socket.on('remove user success', ({
+                        deletedUserId,
+                        message
+                    }) => {
                         document.getElementById("AU" + deletedUserId).style.display = "none";
                         alert(message);
                     });
 
-                    socket.on('remove user error', ({message}) => {
+                    socket.on('remove user error', ({
+                        message
+                    }) => {
                         alert(message);
                     });
 
                     //console.log("Playlis Id;", returnPlaylistId());
+                </script>
+
+                <script>
+
+                    /*setTimeout()
+
+                    function autoLoadPlaylist(){
+                        const pId = document.getElementById("playlist-id").value;
+                        
+                        alert("Adding player id", pId);
+                        
+                        
+                        return false;
+                    }
+
+                    //autoLoadPlaylist();*/
+
                 </script>
 
 

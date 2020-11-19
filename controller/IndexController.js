@@ -29,3 +29,6 @@ exports.PrivatePlalistPage = (req, res) => {
     return res.render('Storage/private-playlist', { title: Title});
 }
 
+exports.DeezerHeaders = (req, res) => {
+    return res.render('Storage/deezer-headers', { title: Title});
+}
