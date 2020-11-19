@@ -19,7 +19,7 @@ exports.router = (() => {
  *                  description: display all the users in the database
  */
 
-  userRouter.get("/all", userHandler.getUsers);
+  userRouter.get("/all", passport.authenticate("jwt", { session: false }),userHandler.getUsers);
 
   /**
  * @swagger
@@ -41,7 +41,7 @@ exports.router = (() => {
  *              description: Requires Ruthentication
  */
 
-  userRouter.get("/:id", userHandler.getUserById);
+  userRouter.get("/:id", passport.authenticate("jwt", { session: false }),userHandler.getUserById);
 
 /**
  * @swagger
@@ -64,7 +64,7 @@ exports.router = (() => {
   );
 
 
-  userRouter.get("/:username", userHandler.getUserByUsername);
+  userRouter.get("/:username", passport.authenticate("jwt", { session: false }),userHandler.getUserByUsername);
 
   return userRouter;
 })();
