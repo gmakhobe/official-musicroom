@@ -55,14 +55,21 @@
 <div id="controlers">
 
     <br />
+    <h3>Music Controls</h3>
     <input class="btn btn-secondary" type="button" onclick="DZ.player.prev(); return false;" value="Prev" />
     <input class="btn btn-secondary" type="button" onclick="DZ.player.pause(); return false;" value="Pause" />
     <input class="btn btn-secondary" type="button" onclick="DZ.player.play(); return false;" value="Play" />
     <input class="btn btn-secondary" type="button" onclick="DZ.player.next(); return false;" value="Next" />
     <br />
-    <input type="button" onclick="DZ.player.setMute(); return false;" value="Set Mute" />
-    <input type="button" onclick="DZ.player.setVolume(20); return false;" value="Set Volume 20" />
-    <input type="button" onclick="DZ.player.setVolume(80); return false;" value="Set Volume 80" />
+    <h3>Volume Controls</h3>
+    <input class="btn btn-secondary" type="button" onclick="DZ.player.setMute(); return false;" value="Set Mute" />
+    <input class="btn btn-secondary" type="button" onclick="DZ.player.setVolume(20); return false;"
+        value="Set Volume 20" />
+    <input class="btn btn-secondary" type="button" onclick="DZ.player.setVolume(80); return false;"
+        value="Set Volume 80" />
+
+    <input class="btn btn-secondary" type="button" onclick="DZ.player.playTracks([3135556], false); return false;"
+        value="Play track" />
 
     <br /><br /><br />
 </div>
@@ -88,11 +95,19 @@
     }
 
     function onPlayerLoaded() {
-       $("#controlers input").attr('disabled', false);
+        $("#controlers input").attr('disabled', false);
         event_listener_append('player_loaded');
         DZ.Event.subscribe('current_track', function (arg) {
             event_listener_append('current_track', arg.index, arg.track.title, arg.track.album.title);
-            console.log("Track Information",arg);
+            //console.log("Track Information", arg);
+            alert("Socket should emit");
+
+            const pId = document.getElementById("playlist-id").value;
+
+            socket.emit("broadcast track", {
+                trackId: arg.track.id,
+                pId: pId
+            });
         });
         DZ.Event.subscribe('player_position', function (arg) {
             event_listener_append('position', arg[0], arg[1]);
@@ -109,6 +124,8 @@
             channelUrl: 'http://localhost:5000/playlist-header',
             player: {
                 container: 'player',
+                muted: false,
+                volume: 100,
                 playlist: true,
                 width: 650,
                 height: 300,
@@ -117,10 +134,19 @@
         });
     });
 
-    setTimeout(function(){
+    setTimeout(function () {
         const pId = document.getElementById("playlist-id").value;
-        DZ.player.playPlaylist(Number(pId)); return false
+        DZ.player.playPlaylist(Number(pId));
+        return false
     }, 3000);
+
+    socket.on("broadcast track", (data) => {
+        alert("Someone added a track to a player");
+    });
+
+    socket.on("broadcast track success", (data) => {
+        alert("Success message");
+    });
 </script><br />
 event_listener : <br />
 <pre id="event_listener" style="height:100px;overflow:auto;"></pre>
