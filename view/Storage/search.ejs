@@ -66,7 +66,7 @@
             .then(data => {
 
               const userDisplay = document.getElementById("AllUsers");
-              const CreatorId = document.getElementById("creator-id").value;
+              const CreatorId = localStorage.getItem("_id");
               const PlaylistId = document.getElementById("playlist-id").value;
               userDisplay.innerHTML = "";
 
@@ -176,7 +176,7 @@
 
             })
             .catch(error => {
-              alert(`An error occured! ${error}`);
+              alert(`From  nowAn error occured! ${error}`);
             });
 
         }

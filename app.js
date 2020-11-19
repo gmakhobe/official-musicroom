@@ -93,7 +93,7 @@ app.use("/api/explore", playlistRouter.router);
 io.of("/api/playlist").on("connection", (socket) => {
   socket.emit("welcome", "Welcome to Music Room");
 
-  socket.om("remove user", (data) => {
+  socket.on("remove user", (data) => {
     const parameters = {
       PId: data.PId,
       user: data.userId,
@@ -101,7 +101,7 @@ io.of("/api/playlist").on("connection", (socket) => {
     };
 
     Playlist.findOne({
-      _id: parameters["PId"],
+      _deezerPId: parameters["PId"],
     }).then((response) => {
       if (!response) {
         return socket.emit("remove user error", {
@@ -141,7 +141,7 @@ io.of("/api/playlist").on("connection", (socket) => {
 
       Playlist.findOneAndUpdate(
         {
-          _id: parameters["PId"],
+          _deezerPId: parameters["PId"],
         },
         {
           $set: {
@@ -153,16 +153,21 @@ io.of("/api/playlist").on("connection", (socket) => {
         }
       )
         .then((list) => {
+
+          console.log("Hello 1");
+
           if (list) {
-            return io
-              .of("/api/playlist")
-              .in(parameters["PId"])
-              .emit("remove user success", {
+
+            console.log("Hello 2");
+
+            return socket.emit("remove user success", {
                 success: true,
-                message: `${deletedUser.firstname} ${deletedUser.lastname} been removed from the room`,
+                message: `User was removed from the room`,
                 deletedUserId: deletedUser.id,
               });
           }
+
+          console.log("Hello 3");
         })
         .catch((error) => {
           if (error) {
