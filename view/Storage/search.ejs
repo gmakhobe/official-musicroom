@@ -209,8 +209,8 @@
   function SendSongInfo(pId, cId, tId, name) {
     const userid = localStorage.getItem("_id");
 
-    //alert(`${pId} - ${cId} - ${tId}`);
-    alert(`Adding ${name} to playlist!`);
+    //alert(`PID: ${pId} - CID: ${cId} - TID: ${tId}, Name: ${name}, UserId: ${userid}`);
+    alert(`Adding ${name}-${pId} to playlist!`);
     socket.emit('add track', {
       PId: pId,
       trackId: tId,
@@ -226,14 +226,4 @@
     alert(message);
   });
 
-  socket.on('add track success', ({
-    message,
-    trackId
-  }) => {
-    alert(message);
-    document.getElementById(trackId).style.display = "none";
-
-    let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
-    document.getElementById("deezer-widget-player").setAttribute("data-src", source);
-  });
 </script>
