@@ -207,6 +207,7 @@
                       document.getElementById("p-username").value = data.user.username;
                       document.getElementById("p-email").value = data.user.email;
                       localStorage.setItem("_id", data.user._id);
+                      localStorage.setItem("username", data.user.username);
 
                       if (!data.user._deezerId || !data.user.deezerToken) {
 

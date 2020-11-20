@@ -1,0 +1,112 @@
+<!-- partial:header -->
+<%- include ('admin/admin-header.ejs') %>
+<div class="container-scroller">
+    <!-- partial:top nav bar -->
+    <%- include ('admin/top-nav.ejs') %>
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial:top side bar -->
+        <%- include ('admin/side-nav.ejs') %>
+        <div class="main-panel">
+            <div class="content-wrapper">
+
+                <script src="/socket.io/socket.io.js"></script>
+                <script>
+                    const socket = io('/api/playlist');
+                </script>
+
+                <div class="row">
+                    <div class="col-12 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 pr-1">
+                                        <img id="PlalistPicture" src="https://placeimg.com/500/500/any"
+                                            class="mb-2 rounded" style="width:300px" alt="image">
+                                    </div>
+                                    <div class="col-6 pl-1">
+                                        <h2><strong><span id="PlalistName">Playlist Name</span></strong> -Public Playlist-</h2>
+                                        <p><strong><span id="PlalistDate">Created Date</span></strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input id="creator-id" type="text" hidden />
+                <input id="playlist-id" type="text" hidden />
+
+                <%- include ('search-2.ejs') %>
+
+                <div class="row">
+                    <div class="col-12 grid-margin">
+                        <div class="card">
+                            <div class="card-body">
+
+
+                                <h3 class="card-title">Deezer Player</h3>
+                                <%- include ('deezer-assets.ejs') %>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    //Returns playlis id from url
+                    function returnPlaylistId() {
+                        let url = window.location.href;
+                        let arr = url.split("/");
+
+                        return (arr[arr.length - 1]);
+                    }
+
+                    const userId = localStorage.getItem("_id");
+                    const PlaylistId = returnPlaylistId();
+
+                    socket.emit('playlist data', {
+                        _deezerPId: PlaylistId
+                    })
+
+                    socket.on('playlist data success', (data) => {
+                        const infoDeezer = data.playlistDetails[1];
+                        const infoLocal = data.playlistDetails[0];
+                        const AvailableUsersDes = document.getElementById("AvailableUsers");
+
+                        document.getElementById("PlalistName").innerHTML = infoLocal.name;
+                        document.getElementById("PlalistDate").innerHTML = infoLocal.created_at;
+                        document.getElementById("PlalistPicture").src = infoDeezer.picture;
+
+                        console.log("New Data you should look into", data);
+
+                        document.getElementById("playlist-id").value = infoDeezer.id;
+                        document.getElementById("creator-id").value = infoLocal.users[0].id;
+
+                        var w = document[typeof document.getElementsByClassName === 'function' ?
+                            'getElementsByClassName' : 'querySelectorAll']('deezer-widget-player');
+                        for (var i = 0, l = w.length; i < l; i++) {
+                            w[i].innerHTML = '';
+                            var el = document.createElement('iframe');
+                            el.src = w[i].getAttribute('data-src');
+                            el.scrolling = w[i].getAttribute('data-scrolling');
+                            el.frameBorder = w[i].getAttribute('data-frameborder');
+                            el.setAttribute('frameBorder', w[i].getAttribute('data-frameborder'));
+                            el.allowTransparency = w[i].getAttribute('data-allowTransparency');
+                            el.width = w[i].getAttribute('data-width');
+                            el.height = w[i].getAttribute('data-height');
+                            w[i].appendChild(el);
+                        }
+
+                    });
+
+                    
+
+                </script>
+
+            </div>
+        </div>
+    </div>
+    <%- include ('admin/load-scripts.ejs') %>
+    </body>
+
+    </html>
