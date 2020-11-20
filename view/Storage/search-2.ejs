@@ -102,7 +102,7 @@
       const userid = localStorage.getItem("_id");
   
       //alert(`PID: ${pId} - CID: ${cId} - TID: ${tId}, Name: ${name}, UserId: ${userid}`);
-      alert(`Adding ${name} to playlist!`);
+      alert(`Adding ${name}-${pId} to playlist!`);
       socket.emit('add track', {
         PId: pId,
         trackId: tId,
