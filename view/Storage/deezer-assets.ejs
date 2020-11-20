@@ -7,11 +7,11 @@
 
     socket.emit("join room", {
         name:myusername,
-        pId: playlistId
+        PId: playlistId
     });
 
     socket.on("welcome", ({message}) => {
-        alert(message);
+        //alert(message);
     });
 
     socket.on("user join", ({message}) => {
@@ -156,7 +156,7 @@
 
     setTimeout(function () {
         const pId = document.getElementById("playlist-id").value;
-        alert("Adding Playlist Id to tag");
+        //alert("Adding Playlist Id to tag");
         DZ.player.playPlaylist(Number(pId));
         return false
     }, 3000);
@@ -176,19 +176,22 @@
       alert(message);
       document.getElementById(trackId).style.display = "none";
 
-      DZ.player.playTracks([trackId]);
+      //DZ.player.playTracks([trackId]);
+      DZ.player.addToQueue([trackId]);
+
+      document.getElementById("MusicList").style.display = "none";
   
-      let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
-      document.getElementById("deezer-widget-player").setAttribute("data-src", source);
+      //let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
+      //document.getElementById("deezer-widget-player").setAttribute("data-src", source);
     });
 
     socket.on('new track added', ({
       message,
       trackId
     }) => {
-      alert(message);
+      alert(message + " <- Hello");
       
-      DZ.player.playTracks([trackId]);
+      DZ.player.addToQueue([trackId]);
     });
 </script><br />
 <div style="display: none;">
