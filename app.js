@@ -88,29 +88,14 @@ app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use("/api/auth", authRouter.router);
 app.use("/api/user", userRouter.router);
 app.use("/api/search", searchRouter.router);
-app.use("/api/explore", playlistRouter.router);
+app.use("/api/playlist", playlistRouter.router);
 
 // End Use routers
 
 const { userJoin, getCurrentUser } = require("./utils/user");
 
 io.of("/api/playlist").on("connection", (socket) => {
-  socket.on("broadcast track", (data) => {
-    const trackId = data.trackId;
-    const PId = data.PId;
-
-    io.of("/api/playlist").in(PId).emit("broadcast track", {
-      success: true,
-      message: `Someone has emitted a track in the room`,
-      trackId: trackId,
-    });
-    socket.emit("broadcast track success", {
-      success: true,
-      message: `You have successfully emitted a track in the room`,
-      trackId: trackId,
-    });
-  });
-
+  
   socket.on("remove user", (data) => {
     const parameters = {
       PId: data.PId,
