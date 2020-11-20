@@ -1,0 +1,121 @@
+<div id="searchDev" class="col-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+  
+        <div class="form-group">
+          <input id="playlistSearch" class="form-control" type="text" placeholder="Search..." /><br>
+          <select class="form-control" id="playlistType">
+            <option value="track">Track</option>
+          </select>
+          <br>
+          <button onclick="playlistSearch()" class="btn btn-gradient-dark">Search for tracks</button>
+        </div>
+  
+        <style>
+          .list-group-item:hover {
+            background-color: black;
+            color: white;
+          }
+        </style>
+  
+        <script>
+          const playlistSearch = () => {
+            const search = document.getElementById("playlistSearch").value;
+            const type = document.getElementById("playlistType").value;
+            const token = localStorage.getItem("token");
+  
+            if (!search || search.length < 2) {
+              alert("Search filed required");
+              return;
+            }
+  
+            fetch(`/api/search?type=${type}&q=${search}`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': token
+                }
+              })
+              .then(res => {
+                if (res.status == 200)
+                  return res.json();
+                else
+                  alert("An error occured please try again!");
+              })
+              .then(data => {
+                const tracks = data.results;
+  
+                document.getElementById("MusicList").style.display = "inline";
+                document.getElementById("searchHeading").innerHTML = `Search results: "${search}"`;
+                let tList = document.getElementById('TrackList');
+                tList.innerHTML = "";
+  
+                //Get PlaylistId, CreatorId, TrackId
+                const PlaylistId = document.getElementById("playlist-id").value,
+                  CreatorId = document.getElementById("creator-id").value;
+  
+                //console.log("Searched Tracks:", data)
+  
+                tracks.map((track) => {
+  
+                  tList.innerHTML += `
+                    <a id="${track.id}" href="javascript:SendSongInfo('${PlaylistId}', '${CreatorId}', '${track.id}', '${track.title}')" class="list-group-item">
+                      <h3>${track.title}</h3>
+                      <p>${track.artist.name} - ${track.album.title}</p>
+                    </a>
+                  `;
+  
+                });
+  
+              })
+              .catch(error => {
+                alert(`From  nowAn error occured! ${error}`);
+              });
+  
+          }
+  
+        </script>
+  
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-12 grid-margin stretch-card" id="MusicList">
+    <div class="card">
+      <div class="card-body">
+  
+        <h2 id="searchHeading">Search results: "*****"</h2>
+  
+        <div class="list-group" id="TrackList">
+          <a href="#" class="list-group-item">First item</a>
+          <a href="#" class="list-group-item">Second item</a>
+          <a href="#" class="list-group-item">Third item</a>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.getElementById("MusicList").style.display = "none";
+  
+    function SendSongInfo(pId, cId, tId, name) {
+      const userid = localStorage.getItem("_id");
+  
+      //alert(`PID: ${pId} - CID: ${cId} - TID: ${tId}, Name: ${name}, UserId: ${userid}`);
+      alert(`Adding ${name} to playlist!`);
+      socket.emit('add track', {
+        PId: pId,
+        trackId: tId,
+        creatorId: cId,
+        userId: userid
+      });
+      //Socket Implementation
+    }
+  
+    socket.on('add track error', ({
+      message
+    }) => {
+      alert(message);
+    });
+  
+  </script>

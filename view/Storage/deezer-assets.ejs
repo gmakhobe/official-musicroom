@@ -1,4 +1,25 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+
+<script>
+
+    const myusername = localStorage.getItem("username");
+    const playlistId = document.getElementById("playlist-id").value;
+
+    socket.emit("join room", {
+        name:myusername,
+        pId: playlistId
+    });
+
+    socket.on("welcome", ({message}) => {
+        alert(message);
+    });
+
+    socket.on("user join", ({message}) => {
+        alert(message);
+    });
+
+</script>
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
 <script type="text/javascript" src="https://cdns-files.dzcdn.net/js/min/dz-v00401308.js" defer="true"></script>
@@ -135,6 +156,7 @@
 
     setTimeout(function () {
         const pId = document.getElementById("playlist-id").value;
+        alert("Adding Playlist Id to tag");
         DZ.player.playPlaylist(Number(pId));
         return false
     }, 3000);
@@ -145,6 +167,28 @@
 
     socket.on("broadcast track success", (data) => {
         alert("Success message");
+    });
+
+    socket.on('add track success', ({
+      message,
+      trackId
+    }) => {
+      alert(message);
+      document.getElementById(trackId).style.display = "none";
+
+      DZ.player.playTracks([trackId]);
+  
+      let source = document.getElementById("deezer-widget-player").getAttribute("data.src");
+      document.getElementById("deezer-widget-player").setAttribute("data-src", source);
+    });
+
+    socket.on('new track added', ({
+      message,
+      trackId
+    }) => {
+      alert(message);
+      
+      DZ.player.playTracks([trackId]);
     });
 </script><br />
 <div style="display: none;">
