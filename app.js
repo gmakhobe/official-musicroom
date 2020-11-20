@@ -22,6 +22,7 @@ const port = 5000;
 const swaggerUI = require("swagger-ui-express");
 const swaggerJsDocs = require("swagger-jsdoc");
 const User = require("./model/UserModel");
+const { response } = require("express");
 // MongoDB Connection
 
 //DB Connection
@@ -76,7 +77,7 @@ const swaggerOptions = {
     "./router/playlistRouter.js",
     "./router/searchRouter.js",
     "./router/userRouter.js",
-    "./router/authRouter.js"
+    "./router/authRouter.js",
   ],
 };
 
@@ -91,27 +92,24 @@ app.use("/api/explore", playlistRouter.router);
 
 // End Use routers
 
+const { userJoin, getCurrentUser } = require("./utils/user");
+
 io.of("/api/playlist").on("connection", (socket) => {
-  socket.emit("welcome", "Welcome to Music Room");
-
   socket.on("broadcast track", (data) => {
-	const trackId = data.trackId
-	const PId = data.PId
+    const trackId = data.trackId;
+    const PId = data.PId;
 
-	io.of("/api/playlist")
-    .in(PId)
-    .emit("broadcast track", {
+    io.of("/api/playlist").in(PId).emit("broadcast track", {
       success: true,
       message: `Someone has emitted a track in the room`,
       trackId: trackId,
-	});
-	socket.emit("broadcast track success", {
-    success: true,
-    message: `You have successfully emitted a track in the room`,
-    trackId: trackId,
+    });
+    socket.emit("broadcast track success", {
+      success: true,
+      message: `You have successfully emitted a track in the room`,
+      trackId: trackId,
+    });
   });
-
-  })
 
   socket.on("remove user", (data) => {
     const parameters = {
@@ -173,16 +171,13 @@ io.of("/api/playlist").on("connection", (socket) => {
         }
       )
         .then((list) => {
-
           if (list) {
-
             return socket.emit("remove user success", {
-                success: true,
-                message: `User was removed from the room`,
-                deletedUserId: deletedUser.id,
-              });
+              success: true,
+              message: `User was removed from the room`,
+              deletedUserId: deletedUser.id,
+            });
           }
-
         })
         .catch((error) => {
           if (error) {
@@ -195,12 +190,19 @@ io.of("/api/playlist").on("connection", (socket) => {
     });
   });
 
-
-
   socket.on("join room", (data) => {
-    //add joinung func here,
-    //https://www.youtube.com/watch?v=jD7FnbI76Hg&t=2266s
-  })
+    //add you to users who are online
+    const user = userJoin(socket.id, data.name, data.PId);
+    //join the room
+    socket.join(data.PId);
+    //say welcome
+    socket.emit("welcome", {message: "Welcome to the room"});
+
+    //tell everybody that you have joined
+    socket.broadcast
+      .to(user.roomId)
+      .emit("user join", {message: `${user.name} has joined the room`});
+  });
 
   socket.on("add user", (data) => {
     /* check playlist in db */
@@ -457,6 +459,10 @@ io.of("/api/playlist").on("connection", (socket) => {
                   message: "track successfully added",
                   trackId: parameters.trackId,
                 });
+                io.to(parameters.PId).emit("new track added", {
+                  message: "new track added to playlist",
+                  trackId: parameters.trackId,
+                });
               } else {
                 console.log("could not add track bozza!!!");
                 socket.emit("add track error", {
@@ -499,6 +505,10 @@ io.of("/api/playlist").on("connection", (socket) => {
               if (result) {
                 socket.emit("add track success", {
                   message: "track successfully added",
+                  trackId: parameters.trackId,
+                });
+                io.to(parameters.PId).emit("new track added", {
+                  message: "new track added to playlist",
                   trackId: parameters.trackId,
                 });
               } else {
@@ -599,6 +609,10 @@ io.of("/api/playlist").on("connection", (socket) => {
         );
       });
   });
+
+  socket.on("disconnect", () => {
+	  io.emit("user diconnect", "a user has disconnected")
+  })
 });
 
 //App should listen to request on port ${port}
